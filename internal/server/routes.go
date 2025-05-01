@@ -1,8 +1,6 @@
 package server
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/a-h/templ"
@@ -10,6 +8,7 @@ import (
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/strangecousinwst/goworkout/cmd/web"
+	"github.com/strangecousinwst/goworkout/internal/handlers"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -27,7 +26,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}))
 
 	// Static assets
-	fileServer := http.FileServer(http.FS(web.Files))
+	fileServer := http.FileServer(http.FS(cmd.Files))
 	r.Handle("/assets/*", fileServer)
 
 	// Web routes
@@ -50,8 +49,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Post("/users", s.UserHandler.HandleRegisterUser)
 	r.Post("/tokens/authentication", s.TokenHandler.HandleCreateToken)
 
-	r.Get("/login", web.LoginWebHandler)
-	r.Post("/login", web.LoginWebHandler)
+	r.Get("/login", handlers.LoginWebHandler)
+	r.Post("/login", handlers.LoginWebHandler)
 
 	r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
 	r.Post("/hello", web.HelloWebHandler)
@@ -97,21 +96,4 @@ func (s *Server) registerAPIRoutes(r chi.Router) {
 	// 		// etc...
 	// 	})
 	// })
-}
-
-func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
-	}
-
-	_, _ = w.Write(jsonResp)
-}
-
-func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
-	jsonResp, _ := json.Marshal(s.db.Health())
-	_, _ = w.Write(jsonResp)
 }

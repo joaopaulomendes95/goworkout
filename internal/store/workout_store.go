@@ -39,6 +39,7 @@ type WorkoutStore interface {
 	UpdateWorkout(*Workout) error
 	DeleteWorkout(id int64) error
 	GetWorkoutOwner(id int64) (int, error)
+	GetWorkoutsForUser(id int) ([]Workout, error)
 }
 
 func (s *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error) {
@@ -245,4 +246,38 @@ func (pg *PostgresWorkoutStore) GetWorkoutOwner(workoutID int64) (int, error) {
 	}
 
 	return userID, nil
+}
+
+func (pg *PostgresWorkoutStore) GetWorkoutsForUser(userID int64) ([]Workout, error) {
+	query := `
+    SELECT id, user_id, title, description, duration_minutes, calories_burned, created_at, updated_at 
+    FROM workouts
+    WHERE user_id = $1
+    ORDER BY created_at DESC
+    `
+
+	rows, err := pg.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var workouts []Workout
+	for rows.Next() {
+		var w Workout
+		err := rows.Scan(
+			&w.ID,
+			&w.UserID,
+			&w.Title,
+			&w.Description,
+			&w.DurationMinutes,
+			&w.CaloriesBurned,
+		)
+		if err != nil {
+			return nil, err
+		}
+		workouts = append(workouts, w)
+	}
+
+	return workouts, nil
 }

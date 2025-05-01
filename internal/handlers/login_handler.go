@@ -1,7 +1,12 @@
-package web
+package handlers
 
-import "net/http"
+import (
+	"net/http"
 
+	"github.com/strangecousinwst/goworkout/cmd/web"
+)
+
+// LoginWebHandler handles both GET and POST requests for /login
 func LoginWebHandler(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -18,9 +23,9 @@ func LoginWebHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_ = LoginForm().Render(r.Context(), w)
+		_ = web.LoginForm().Render(r.Context(), w)
 		return
 	}
 
-	_ = LoginForm().Render(r.Context(), w)
+	_ = web.LoginForm().Render(r.Context(), w)
 }

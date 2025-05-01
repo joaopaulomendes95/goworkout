@@ -28,6 +28,7 @@ type Server struct {
 }
 
 func NewServer() *http.Server {
+	// int port = FuncaoDoPort("PORT");
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		port = 8080

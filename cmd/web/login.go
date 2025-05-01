@@ -8,7 +8,6 @@ func LoginWebHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusInternalServerError)
 		return
 	}
-
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 

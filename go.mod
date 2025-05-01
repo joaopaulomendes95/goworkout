@@ -11,6 +11,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.37.0
 	golang.org/x/crypto v0.37.0
+	golang.org/x/net v0.38.0
 )
 
 require (

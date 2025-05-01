@@ -16,10 +16,10 @@ import (
 )
 
 type Server struct {
-	port        int
-	UserHandler *api.UserHandler
-
-	db database.Service
+	port           int
+	WorkoutHandler *api.WorkoutHandler
+	UserHandler    *api.UserHandler
+	db             database.Service
 }
 
 func NewServer() *http.Server {
@@ -38,15 +38,18 @@ func NewServer() *http.Server {
 	}
 
 	// TODO: Implement stores
+	workoutStore := store.NewPostgresWorkoutStore(pgDB)
 	userStore := store.NewPostgresUserStore(pgDB)
 
 	// TODO: Implement handlers
+	workoutHandler := api.NewWorkoutHandler(workoutStore)
 	userHandler := api.NewUserHandler(userStore)
 
 	server := &Server{
-		port:        port,
-		UserHandler: userHandler,
-		db:          dbService,
+		port:           port,
+		WorkoutHandler: workoutHandler,
+		UserHandler:    userHandler,
+		db:             dbService,
 	}
 
 	// Declare Server config

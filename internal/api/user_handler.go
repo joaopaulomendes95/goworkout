@@ -60,7 +60,7 @@ func (h *UserHandler) ValidateRegisterRequest(req *registerUserRequest) error {
 	return nil
 }
 
-func (h *UserHandler) HandleRegisterUser(w http.ResponseWriter, r *http.Response) {
+func (h *UserHandler) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req registerUserRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)

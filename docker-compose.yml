@@ -3,11 +3,11 @@ services:
     image: postgres:latest
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${BLUEPRINT_DB_DATABASE}
-      POSTGRES_USER: ${BLUEPRINT_DB_USERNAME}
-      POSTGRES_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
+      POSTGRES_DB: ${GOWORKOUT_DB_DATABASE}
+      POSTGRES_USER: ${GOWORKOUT_DB_USERNAME}
+      POSTGRES_PASSWORD: ${GOWORKOUT_DB_PASSWORD}
     ports:
-      - "${BLUEPRINT_DB_PORT}:5432"
+      - "${GOWORKOUT_DB_PORT}:5432"
     volumes:
       - psql_volume_goworkout:/var/lib/postgresql/data
 

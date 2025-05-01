@@ -12,6 +12,8 @@ Special thanks to:
 - https://github.com/tailwindlabs/tailwindcss
 - https://github.com/neovim/neovim
 
+Some way or another, these projects were either used as a reference or inspiration
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.

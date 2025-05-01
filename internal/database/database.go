@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/pressly/goose/v3"
 )
 
 // Service represents a service that interacts with a database.
@@ -22,6 +24,9 @@ type Service interface {
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
 	Close() error
+
+	// Gets a pointer to the database
+	GetDB() *sql.DB
 }
 
 type service struct {
@@ -52,6 +57,28 @@ func New() Service {
 		db: db,
 	}
 	return dbInstance
+}
+
+func (s *service) GetDB() *sql.DB {
+	return s.db
+}
+
+func MigrateFS(db *sql.DB, migrationsFS fs.FS, dir string) error {
+	goose.SetBaseFS(migrationsFS)
+	defer func() {
+		goose.SetBaseFS(nil)
+	}()
+
+	return Migrate(db, dir)
+}
+
+func Migrate(db *sql.DB, dir string) error {
+	err := goose.SetDialect("postgres")
+	if err != nil {
+		return fmt.Errorf("migrate: %w", err)
+	}
+
+	return nil
 }
 
 // Health checks the health of the database connection by pinging the database.

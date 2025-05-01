@@ -31,6 +31,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// Example
 	// r.HandleFunc("api/users", api.UserHandler) REST
 	// r.HandleFunc("/", web.HelloWebHandler)			HTML
+	r.Get("/login", web.LoginWebHandler)
+	r.Post("/login", web.LoginWebHandler)
 
 	r.Get("/", s.HelloWorldHandler)
 

@@ -1,0 +1,12 @@
+package web
+
+templ LoginForm() {
+    @Base() {
+        <form hx-post="/login" method="POST" hx-target="#login-container" class="space-y-4">
+            <input class="bg-gray-200 text-black p-2 border border-gray-400 rounded-lg w-full" name="username" type="text" placeholder="Username" required />
+            <input class="bg-gray-200 text-black p-2 border border-gray-400 rounded-lg w-full" name="password" type="password" placeholder="Password" required />
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded w-full">Login</button>
+        </form>
+        <div id="login-container"></div>
+    }
+}

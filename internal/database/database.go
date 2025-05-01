@@ -34,12 +34,12 @@ type service struct {
 }
 
 var (
-	database   = os.Getenv("BLUEPRINT_DB_DATABASE")
-	password   = os.Getenv("BLUEPRINT_DB_PASSWORD")
-	username   = os.Getenv("BLUEPRINT_DB_USERNAME")
-	port       = os.Getenv("BLUEPRINT_DB_PORT")
-	host       = os.Getenv("BLUEPRINT_DB_HOST")
-	schema     = os.Getenv("BLUEPRINT_DB_SCHEMA")
+	database   = os.Getenv("GOWORKOUT_DB_DATABASE")
+	password   = os.Getenv("GOWORKOUT_DB_PASSWORD")
+	username   = os.Getenv("GOWORKOUT_DB_USERNAME")
+	port       = os.Getenv("GOWORKOUT_DB_PORT")
+	host       = os.Getenv("GOWORKOUT_DB_HOST")
+	schema     = os.Getenv("GOWORKOUT_DB_SCHEMA")
 	dbInstance *service
 )
 
@@ -76,6 +76,11 @@ func Migrate(db *sql.DB, dir string) error {
 	err := goose.SetDialect("postgres")
 	if err != nil {
 		return fmt.Errorf("migrate: %w", err)
+	}
+
+	err = goose.Up(db, dir)
+	if err != nil {
+		return fmt.Errorf("goose up: %w", err)
 	}
 
 	return nil

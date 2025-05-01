@@ -15,9 +15,6 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
 
-	// Define fileServer to serve http templates
-	fileServer := http.FileServer(http.FS(web.Files))
-
 	// Middlewares to use
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
@@ -28,11 +25,17 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 
+	// Define fileServer to serve http templates
+	fileServer := http.FileServer(http.FS(web.Files))
+	r.Handle("/assets/*", fileServer)
+	// Example
+	// r.HandleFunc("api/users", api.UserHandler) REST
+	// r.HandleFunc("/", web.HelloWebHandler)			HTML
+
 	r.Get("/", s.HelloWorldHandler)
 
 	r.Get("/health", s.healthHandler)
 
-	r.Handle("/assets/*", fileServer)
 	r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
 	r.Post("/hello", web.HelloWebHandler)
 

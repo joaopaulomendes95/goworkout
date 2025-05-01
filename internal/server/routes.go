@@ -15,8 +15,9 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
 
-	// Middlewares to use
+	// Common middleware stack
 	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
@@ -25,12 +26,16 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	// Define fileServer to serve http templates
+	// Static assets
 	fileServer := http.FileServer(http.FS(web.Files))
 	r.Handle("/assets/*", fileServer)
-	// Example
-	// r.HandleFunc("api/users", api.UserHandler) REST
-	// r.HandleFunc("/", web.HelloWebHandler)			HTML
+
+	// Web routes
+	s.registerWebRoutes(r)
+
+	// API routes with version
+	s.registerAPIRoutes(r)
+
 	r.Get("/login", web.LoginWebHandler)
 	r.Post("/login", web.LoginWebHandler)
 
@@ -42,6 +47,46 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Post("/hello", web.HelloWebHandler)
 
 	return r
+}
+
+func (s *Server) registerWebRoutes(r chi.Router) {
+	// HTML routes
+	// r.Get("/login", web.LoginWebHandler)
+	// r.Post("/login", web.LoginWebHandler)
+	// r.Get("/", web.DashboardHandler) // Main dashboard
+	// r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
+	// r.Post("/hello", web.HelloWebHandler)
+
+	// // Add workout-related web routes
+	// r.Get("/workouts", web.WorkoutListHandler)
+	// r.Get("/workouts/{id}", web.WorkoutDetailHandler)
+	// r.Get("/workouts/create", web.WorkoutCreateHandler)
+	// // etc...
+	// Group routs and stuff here
+}
+
+func (s *Server) registerAPIRoutes(r chi.Router) {
+	// API routes with version prefix
+	// r.Route("/api/v1", func(r chi.Router) {
+	// 	// Auth
+	// 	r.Post("/login", s.APIHandler.HandleLogin)
+	// 	r.Post("/register", s.UserHandler.HandleRegisterUser)
+
+	// 	// User management
+	// 	r.Route("/users", func(r chi.Router) {
+	// 		r.Get("/", s.UserHandler.HandleGetUsers)
+	// 		r.Post("/", s.UserHandler.HandleCreateUser)
+	// 		r.Get("/{id}", s.UserHandler.HandleGetUser)
+	// 		// etc...
+	// 	})
+
+	// 	// Workout management
+	// 	r.Route("/workouts", func(r chi.Router) {
+	// 		r.Get("/", s.WorkoutHandler.HandleGetWorkouts)
+	// 		r.Post("/", s.WorkoutHandler.HandleCreateWorkout)
+	// 		// etc...
+	// 	})
+	// })
 }
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {

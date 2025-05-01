@@ -14,6 +14,39 @@ Special thanks to:
 
 Some way or another, these projects were either used as a reference or inspiration
 
+## Technology Stack
+
+- **Backend**: Go with Chi router
+- **Frontend**: HTMX + Tailwind CSS + templ templates
+- **Database**: PostgreSQL with Goose migrations
+- **Authentication**: Custom token-based auth
+
+## Project Structure
+
+- `/cmd` - Application entry points
+  - `/api` - API server
+  - `/web` - Web UI components
+- `/internal` - Private application code
+  - `/api` - REST API handlers
+  - `/database` - Database connection management
+  - `/server` - HTTP server configuration
+  - `/store` - Data access layer
+  - `/utils` - Helper functions
+- `/migrations` - PostgreSQL schema migrations
+
+## Requirements
+
+- Go 1.18 or higher
+- PostgreSQL 14+
+- Docker (optional, for containerized database)
+
+## Features
+
+- User authentication and management
+- Create and track workouts
+- Log exercises with sets, reps and weights
+- Responsive web interface
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.

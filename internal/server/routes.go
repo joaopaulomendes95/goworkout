@@ -7,7 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/strangecousinwst/goworkout/cmd/web"
 )
@@ -16,8 +16,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
 
 	// Common middleware stack
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
+	r.Use(chimiddleware.Logger)
+	r.Use(chimiddleware.Recoverer)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
@@ -36,12 +36,22 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// API routes with version
 	s.registerAPIRoutes(r)
 
-	r.Get("/login", web.LoginWebHandler)
-	r.Post("/login", web.LoginWebHandler)
+	r.Group(func(r chi.Router) {
+		r.Use(s.Middleware.Authenticate)
+
+		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleGetWorkoutByID))
+		r.Post("/workouts", s.Middleware.RequireUser(s.WorkoutHandler.HandleCreateWorkout))
+		r.Put("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleUpdateWorkoutByID))
+		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleDeleteWorkoutByID))
+	})
 
 	r.Get("/", s.HelloWorldHandler)
-
 	r.Get("/health", s.healthHandler)
+	r.Post("/users", s.UserHandler.HandleRegisterUser)
+	r.Post("/tokens/authentication", s.TokenHandler.HandleCreateToken)
+
+	r.Get("/login", web.LoginWebHandler)
+	r.Post("/login", web.LoginWebHandler)
 
 	r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
 	r.Post("/hello", web.HelloWebHandler)

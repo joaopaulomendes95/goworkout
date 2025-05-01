@@ -1,10 +1,20 @@
-# Project github.com/strangecousinwst/goworkout
+# goworkout
 
-One Paragraph of project description goes here
+This project is a basic web applicationi to track workouts.
+Its a study subject to get familiar with GO, and frontend in general.
+
+Special thanks to:
+
+- https://github.com/Melkeydev/go-blueprint
+- https://github.com/go-chi/chi
+- https://github.com/air-verse/air
+- https://github.com/a-h/templ
+- https://github.com/tailwindlabs/tailwindcss
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+See deployment for notes on how to deploy the project on a live system.
 
 ## MakeFile
 
@@ -51,4 +61,3 @@ Clean up binary from the last build:
 ```bash
 make clean
 ```
-# goworkout

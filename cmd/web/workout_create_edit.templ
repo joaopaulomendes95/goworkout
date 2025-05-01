@@ -33,7 +33,7 @@ templ WorkoutForm(workout *store.Workout) {
                         hx-push-url={ "/workouts/" + strconv.FormatInt(int64(workout.ID), 10) }
                     }
                     class="space-y-6">
-                    
+
                     <div class="space-y-1">
                         <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
                         <input 
@@ -107,7 +107,7 @@ templ WorkoutForm(workout *store.Workout) {
                                 Add Exercise
                             </button>
                         </div>
-                        
+
                         <div id="exercises-container" class="space-y-4">
                             if workout.ID != 0 && len(workout.Entries) > 0 {
                                 for i, entry := range workout.Entries {
@@ -139,11 +139,11 @@ templ WorkoutForm(workout *store.Workout) {
             document.getElementById('add-exercise').addEventListener('click', function() {
                 const container = document.getElementById('exercises-container');
                 const exerciseCount = container.childElementCount;
-                
+
                 // Create a new exercise entry
                 const newExercise = document.createElement('div');
                 newExercise.className = 'bg-gray-50 p-4 rounded-md relative exercise-entry';
-                
+
                 newExercise.innerHTML = `
                     <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-red-500" onclick="this.parentElement.remove()">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -152,18 +152,18 @@ templ WorkoutForm(workout *store.Workout) {
                     </button>
                     <div class="space-y-4">
                         <input type="hidden" name="entries[${exerciseCount}].orderIndex" value="${exerciseCount}" />
-                        
+
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Exercise Name</label>
                             <input type="text" name="entries[${exerciseCount}].exerciseName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                         </div>
-                        
+
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-1">
                                 <label class="block text-sm font-medium text-gray-700">Sets</label>
                                 <input type="number" name="entries[${exerciseCount}].sets" required min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                             </div>
-                            
+
                             <div class="space-y-1">
                                 <label class="block text-sm font-medium text-gray-700">Type</label>
                                 <select name="entries[${exerciseCount}].type" class="exercise-type mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" onchange="toggleExerciseFields(this)">
@@ -172,34 +172,34 @@ templ WorkoutForm(workout *store.Workout) {
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-2 gap-4">
                             <div class="reps-field space-y-1">
                                 <label class="block text-sm font-medium text-gray-700">Reps</label>
                                 <input type="number" name="entries[${exerciseCount}].reps" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                             </div>
-                            
+
                             <div class="duration-field space-y-1 hidden">
                                 <label class="block text-sm font-medium text-gray-700">Duration (seconds)</label>
                                 <input type="number" name="entries[${exerciseCount}].durationSeconds" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                             </div>
-                            
+
                             <div class="space-y-1">
                                 <label class="block text-sm font-medium text-gray-700">Weight (kg)</label>
                                 <input type="number" name="entries[${exerciseCount}].weight" step="0.1" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                             </div>
                         </div>
-                        
+
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Notes</label>
                             <textarea name="entries[${exerciseCount}].notes" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
                         </div>
                     </div>
                 `;
-                
+
                 container.appendChild(newExercise);
             });
-            
+
             function toggleExerciseFields(selectElement) {
                 const exerciseEntry = selectElement.closest('.exercise-entry');
                 const repsField = exerciseEntry.querySelector('.reps-field');

@@ -44,6 +44,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleDeleteWorkoutByID))
 	})
 
+	r.Get("/login", handlers.LoginWebHandler)
+	r.Post("/login", handlers.LoginWebHandler)
+	r.Get("/signup", handlers.SignupWebHandler(s.Middleware.UserStore))
+	r.Post("/signup", handlers.SignupWebHandler(s.Middleware.UserStore))
+
 	r.Get("/", handlers.HelloWebHandler)
 	r.Get("/health", s.healthHandler)
 	r.Post("/users", s.UserHandler.HandleRegisterUser)

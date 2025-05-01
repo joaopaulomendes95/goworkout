@@ -15,7 +15,7 @@ import (
 func WorkoutDetailHandler(workoutStore store.WorkoutStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idParam := chi.URLParam(r, "id")
-		id, err := strconv.ParseInt(idParam, 10, 64)
+		id, err := strconv.Atoi(idParam)
 		if err != nil {
 			http.Error(w, "Invalid workout ID", http.StatusBadRequest)
 			return
@@ -91,7 +91,7 @@ func WorkoutCreateHandler(workoutStore store.WorkoutStore) http.HandlerFunc {
 func WorkoutEditHandler(workoutStore store.WorkoutStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idParam := chi.URLParam(r, "id")
-		id, err := strconv.ParseInt(idParam, 10, 64)
+		id, err := strconv.Atoi(idParam)
 		if err != nil {
 			http.Error(w, "Invalid workout ID", http.StatusBadRequest)
 			return
@@ -115,11 +115,6 @@ func WorkoutEditHandler(workoutStore store.WorkoutStore) http.HandlerFunc {
 		if err != nil {
 			log.Printf("Error rendering workout form: %v", err)
 			http.Error(w, "Error rendering page", http.StatusInternalServerError)
-			err = web.WorkoutForm(workout).Render(r.Context(), w)
-			if err != nil {
-				log.Printf("Error rendering workout form: %v", err)
-				http.Error(w, "Error rendering page", http.StatusInternalServerError)
-			}
 		}
 	}
 }

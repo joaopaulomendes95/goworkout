@@ -25,13 +25,13 @@ func WriteJSON(w http.ResponseWriter, status int, data Envelope) error {
 	return nil
 }
 
-func ReadIDParam(r *http.Request) (int64, error) {
+func ReadIDParam(r *http.Request) (int, error) {
 	idParam := chi.URLParam(r, "id")
 	if idParam == "" {
 		return 0, errors.New("invalid id parameter")
 	}
 
-	id, err := strconv.ParseInt(idParam, 10, 64)
+	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		return 0, errors.New("invalid id parameter type")
 	}

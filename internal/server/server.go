@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -28,7 +29,6 @@ type Server struct {
 }
 
 func NewServer() *http.Server {
-	// int port = FuncaoDoPort("PORT");
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		port = 8080
@@ -79,4 +79,9 @@ func NewServer() *http.Server {
 	}
 
 	return httpServer
+}
+
+func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
+	jsonResp, _ := json.Marshal(s.db.Health())
+	_, _ = w.Write(jsonResp)
 }

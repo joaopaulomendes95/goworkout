@@ -47,7 +47,7 @@ templ WorkoutCard(workout store.Workout) {
         <p class="text-gray-600 mt-2 line-clamp-2">{ workout.Description }</p>
         <div class="mt-4 flex justify-between items-center">
             <span class="text-orange-500">{ strconv.Itoa(workout.CaloriesBurned) } calories</span>
-            <a href={ templ.SafeURL("/workouts/" + string(workout.ID)) } class="text-blue-500 hover:text-blue-700">
+            <a href={ templ.SafeURL("/workouts/" + strconv.FormatInt(int64(workout.ID), 10)) } class="text-blue-500 hover:text-blue-700">
                 View Details →
             </a>
         </div>

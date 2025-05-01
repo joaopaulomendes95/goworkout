@@ -26,7 +26,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}))
 
 	// Static assets
-	fileServer := http.FileServer(http.FS(cmd.Files))
+	fileServer := http.FileServer(http.FS(web.Files))
 	r.Handle("/assets/*", fileServer)
 
 	// Web routes
@@ -44,7 +44,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleDeleteWorkoutByID))
 	})
 
-	r.Get("/", s.HelloWorldHandler)
+	r.Get("/", handlers.HelloWebHandler)
 	r.Get("/health", s.healthHandler)
 	r.Post("/users", s.UserHandler.HandleRegisterUser)
 	r.Post("/tokens/authentication", s.TokenHandler.HandleCreateToken)
@@ -53,7 +53,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Post("/login", handlers.LoginWebHandler)
 
 	r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
-	r.Post("/hello", web.HelloWebHandler)
+	r.Post("/hello", handlers.HelloWebHandler)
 
 	return r
 }

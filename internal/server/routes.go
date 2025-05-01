@@ -14,8 +14,12 @@ import (
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
 
+	// Define fileServer to serve http templates
+	fileServer := http.FileServer(http.FS(web.Files))
+
+	// Middlewares to use
+	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
@@ -28,7 +32,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.Get("/health", s.healthHandler)
 
-	fileServer := http.FileServer(http.FS(web.Files))
 	r.Handle("/assets/*", fileServer)
 	r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
 	r.Post("/hello", web.HelloWebHandler)

@@ -10,6 +10,7 @@ Special thanks to:
 - https://github.com/air-verse/air
 - https://github.com/a-h/templ
 - https://github.com/tailwindlabs/tailwindcss
+- https://github.com/neovim/neovim
 
 ## Getting Started
 

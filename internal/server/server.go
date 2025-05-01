@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -9,11 +10,14 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
+	"github.com/strangecousinwst/goworkout/internal/api"
 	"github.com/strangecousinwst/goworkout/internal/database"
 )
 
 type Server struct {
-	port int
+	port        int
+	Logger      *log.Logger
+	UserHandler *api.UserHandler
 
 	db database.Service
 }
@@ -25,6 +29,12 @@ func NewServer() *http.Server {
 
 		db: database.New(),
 	}
+
+	// TODO: Logger for custom log
+
+	// TODO: Implement stores
+
+	// TODO: Implement handlers
 
 	// Declare Server config
 	server := &http.Server{

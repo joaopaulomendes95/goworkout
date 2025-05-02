@@ -35,24 +35,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// API routes with version
 	s.registerAPIRoutes(r)
 
-	r.Group(func(r chi.Router) {
-		r.Use(s.Middleware.Authenticate)
-
-		r.Get("/dashboard", s.Middleware.RequireUser(handlers.DashboardHandler(s.WorkoutStore)))
-
-		r.Get("/workouts/create", s.Middleware.RequireUser(handlers.WorkoutCreateHandler(s.WorkoutStore)))
-		r.Post("/workouts/create", s.Middleware.RequireUser(handlers.WorkoutCreateHandler(s.WorkoutStore)))
-		r.Get("/workouts/{id}/edit", s.Middleware.RequireUser(handlers.WorkoutEditHandler(s.WorkoutStore)))
-		r.Post("/workouts/{id}/edit", s.Middleware.RequireUser(handlers.WorkoutEditHandler(s.WorkoutStore)))
-		r.Get("/workouts", s.Middleware.RequireUser(handlers.WorkoutListHandler(s.WorkoutStore)))
-		r.Get("/workouts/{id}", s.Middleware.RequireUser(handlers.WorkoutDetailHandler(s.WorkoutStore)))
-
-		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleGetWorkoutByID))
-		r.Post("/workouts", s.Middleware.RequireUser(s.WorkoutAPI.HandleCreateWorkout))
-		r.Put("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleUpdateWorkoutByID))
-		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleDeleteWorkoutByID))
-	})
-
 	r.Get("/login", handlers.LoginWebHandler(s.UserStore, s.TokenStore))
 	r.Post("/login", handlers.LoginWebHandler(s.UserStore, s.TokenStore))
 	r.Get("/signup", handlers.SignupWebHandler(s.UserStore, s.TokenStore))
@@ -70,6 +52,13 @@ func (s *Server) RegisterRoutes() http.Handler {
 }
 
 func (s *Server) registerWebRoutes(r chi.Router) {
+	r.Group(func(r chi.Router) {
+		r.Use(s.Middleware.Authenticate)
+		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleGetWorkoutByID))
+		r.Post("/workouts", s.Middleware.RequireUser(s.WorkoutAPI.HandleCreateWorkout))
+		r.Put("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleUpdateWorkoutByID))
+		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleDeleteWorkoutByID))
+	})
 	// HTML routes
 	// r.Get("/login", web.LoginWebHandler)
 	// r.Post("/login", web.LoginWebHandler)
@@ -85,7 +74,22 @@ func (s *Server) registerWebRoutes(r chi.Router) {
 	// Group routs and stuff here
 }
 
+// could add a version prefix here for example
+// this handlers return API responses
 func (s *Server) registerAPIRoutes(r chi.Router) {
+	r.Group(func(r chi.Router) {
+		r.Use(s.Middleware.Authenticate)
+
+		r.Get("/dashboard", s.Middleware.RequireUser(handlers.DashboardHandler(s.WorkoutStore)))
+
+		r.Get("/workouts/create", s.Middleware.RequireUser(handlers.WorkoutCreateHandler(s.WorkoutStore)))
+		r.Post("/workouts/create", s.Middleware.RequireUser(handlers.WorkoutCreateHandler(s.WorkoutStore)))
+		r.Get("/workouts/{id}/edit", s.Middleware.RequireUser(handlers.WorkoutEditHandler(s.WorkoutStore)))
+		r.Post("/workouts/{id}/edit", s.Middleware.RequireUser(handlers.WorkoutEditHandler(s.WorkoutStore)))
+		r.Get("/workouts", s.Middleware.RequireUser(handlers.WorkoutListHandler(s.WorkoutStore)))
+		r.Get("/workouts/{id}", s.Middleware.RequireUser(handlers.WorkoutDetailHandler(s.WorkoutStore)))
+	})
+
 	// API routes with version prefix
 	// r.Route("/api/v1", func(r chi.Router) {
 	// 	// Auth

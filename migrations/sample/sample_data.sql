@@ -37,7 +37,7 @@ BEGIN
         VALUES (
             'user' || i, 
             'user' || i || '@example.com',
-            '$2a$12$WpWpkbCXvx5s4LzA5o1Zj.tMTc0/VH1Jus9c3qV37h/oLIbQ12cRK', -- password '123'
+            '$2a$12$jPVNqmpOCw0ayQt6FzYICuqtpSkU02Ts.Jn1K9hG5b7TgFHRDg7dC', -- password '123'
             'Bio for user ' || i || '. Fitness enthusiast who enjoys ' || 
             workout_types[1 + (i % 8)] || ' and ' || workout_types[1 + ((i+3) % 8)] || '.'
         )

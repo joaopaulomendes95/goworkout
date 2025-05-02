@@ -19,16 +19,16 @@ import (
 )
 
 type Server struct {
-	port           int
-	Logger         *log.Logger
-	WorkoutHandler *api.WorkoutHandler
-	UserHandler    *api.UserHandler
-	TokenHandler   *api.TokenHandler
-	WorkoutStore   *store.PostgresWorkoutStore
-	UserStore      *store.PostgresUserStore
-	TokenStore     *store.PostgresTokenStore
-	Middleware     middleware.UserMiddleware
-	db             database.Service
+	port         int
+	Logger       *log.Logger
+	WorkoutAPI   *api.WorkoutAPI
+	UserAPI      *api.UserAPI
+	TokenAPI     *api.TokenAPI
+	WorkoutStore *store.PostgresWorkoutStore
+	UserStore    *store.PostgresUserStore
+	TokenStore   *store.PostgresTokenStore
+	Middleware   middleware.UserMiddleware
+	db           database.Service
 }
 
 func NewServer() *http.Server {
@@ -57,22 +57,22 @@ func NewServer() *http.Server {
 	tokenStore := store.NewPostgresTokenStore(pgDB)
 
 	// TODO: Implement handlers
-	workoutHandler := api.NewWorkoutHandler(workoutStore, logger)
-	userHandler := api.NewUserHandler(userStore, logger)
-	tokenHandler := api.NewTokenHandler(tokenStore, userStore, logger)
+	workoutAPI := api.NewWorkoutAPI(workoutStore, logger)
+	userAPI := api.NewUserAPI(userStore, logger)
+	tokenAPI := api.NewTokenAPI(tokenStore, userStore, logger)
 	middlewareHandler := middleware.UserMiddleware{UserStore: userStore}
 
 	server := &Server{
-		port:           port,
-		Logger:         logger,
-		WorkoutHandler: workoutHandler,
-		UserHandler:    userHandler,
-		TokenHandler:   tokenHandler,
-		WorkoutStore:   workoutStore,
-		UserStore:      userStore,
-		TokenStore:     tokenStore,
-		Middleware:     middlewareHandler,
-		db:             dbService,
+		port:         port,
+		Logger:       logger,
+		WorkoutAPI:   workoutAPI,
+		UserAPI:      userAPI,
+		TokenAPI:     tokenAPI,
+		WorkoutStore: workoutStore,
+		UserStore:    userStore,
+		TokenStore:   tokenStore,
+		Middleware:   middlewareHandler,
+		db:           dbService,
 	}
 
 	// Declare Server config

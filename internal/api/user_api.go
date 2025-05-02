@@ -18,20 +18,20 @@ type registerUserRequest struct {
 	Bio      string `json:"bio"`
 }
 
-type UserHandler struct {
+type UserAPI struct {
 	userStore store.UserStore
 	logger    *log.Logger
 }
 
-func NewUserHandler(userStore store.UserStore, logger *log.Logger) *UserHandler {
-	return &UserHandler{
+func NewUserAPI(userStore store.UserStore, logger *log.Logger) *UserAPI {
+	return &UserAPI{
 		userStore: userStore,
 		logger:    logger,
 	}
 }
 
 // TODO: Implement more validation
-func (h *UserHandler) ValidateRegisterRequest(req *registerUserRequest) error {
+func (h *UserAPI) ValidateRegisterRequest(req *registerUserRequest) error {
 	if req.Username == "" {
 		return errors.New("username is required")
 	}
@@ -61,7 +61,7 @@ func (h *UserHandler) ValidateRegisterRequest(req *registerUserRequest) error {
 	return nil
 }
 
-func (h *UserHandler) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserAPI) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req registerUserRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)

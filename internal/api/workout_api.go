@@ -12,19 +12,19 @@ import (
 	"github.com/strangecousinwst/goworkout/internal/utils"
 )
 
-type WorkoutHandler struct {
+type WorkoutAPI struct {
 	workoutStore store.WorkoutStore
 	logger       *log.Logger
 }
 
-func NewWorkoutHandler(workoutStore store.WorkoutStore, logger *log.Logger) *WorkoutHandler {
-	return &WorkoutHandler{
+func NewWorkoutAPI(workoutStore store.WorkoutStore, logger *log.Logger) *WorkoutAPI {
+	return &WorkoutAPI{
 		workoutStore: workoutStore,
 		logger:       logger,
 	}
 }
 
-func (wh *WorkoutHandler) HandleGetWorkoutByID(w http.ResponseWriter, r *http.Request) {
+func (wh *WorkoutAPI) HandleGetWorkoutByID(w http.ResponseWriter, r *http.Request) {
 	workoutID, err := utils.ReadIDParam(r)
 	if err != nil {
 		wh.logger.Printf("ERROR: readIDParam: %v", err)
@@ -42,7 +42,7 @@ func (wh *WorkoutHandler) HandleGetWorkoutByID(w http.ResponseWriter, r *http.Re
 	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"workout": workout})
 }
 
-func (wh *WorkoutHandler) HandleCreateWorkout(w http.ResponseWriter, r *http.Request) {
+func (wh *WorkoutAPI) HandleCreateWorkout(w http.ResponseWriter, r *http.Request) {
 	var workout store.Workout
 	err := json.NewDecoder(r.Body).Decode(&workout)
 	if err != nil {
@@ -68,7 +68,7 @@ func (wh *WorkoutHandler) HandleCreateWorkout(w http.ResponseWriter, r *http.Req
 	utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"workout": createdWorkout})
 }
 
-func (wh *WorkoutHandler) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Request) {
+func (wh *WorkoutAPI) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Request) {
 	workoutID, err := utils.ReadIDParam(r)
 	if err != nil {
 		wh.logger.Printf("ERROR: readIDParam: %v", err)
@@ -152,7 +152,7 @@ func (wh *WorkoutHandler) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http
 	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"workout": existingWorkout})
 }
 
-func (wh *WorkoutHandler) HandleDeleteWorkoutByID(w http.ResponseWriter, r *http.Request) {
+func (wh *WorkoutAPI) HandleDeleteWorkoutByID(w http.ResponseWriter, r *http.Request) {
 	workoutID, err := utils.ReadIDParam(r)
 	if err != nil {
 		wh.logger.Printf("ERROR: readIDParam: %v", err)

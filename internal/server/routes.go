@@ -47,10 +47,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Get("/workouts", s.Middleware.RequireUser(handlers.WorkoutListHandler(s.WorkoutStore)))
 		r.Get("/workouts/{id}", s.Middleware.RequireUser(handlers.WorkoutDetailHandler(s.WorkoutStore)))
 
-		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleGetWorkoutByID))
-		r.Post("/workouts", s.Middleware.RequireUser(s.WorkoutHandler.HandleCreateWorkout))
-		r.Put("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleUpdateWorkoutByID))
-		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleDeleteWorkoutByID))
+		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleGetWorkoutByID))
+		r.Post("/workouts", s.Middleware.RequireUser(s.WorkoutAPI.HandleCreateWorkout))
+		r.Put("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleUpdateWorkoutByID))
+		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleDeleteWorkoutByID))
 	})
 
 	r.Get("/login", handlers.LoginWebHandler(s.UserStore, s.TokenStore))
@@ -60,8 +60,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.Get("/", handlers.HelloWebHandler)
 	r.Get("/health", s.healthHandler)
-	r.Post("/users", s.UserHandler.HandleRegisterUser)
-	r.Post("/tokens/authentication", s.TokenHandler.HandleCreateToken)
+	r.Post("/users", s.UserAPI.HandleRegisterUser)
+	r.Post("/tokens/authentication", s.TokenAPI.HandleCreateToken)
 
 	r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
 	r.Post("/hello", handlers.HelloWebHandler)

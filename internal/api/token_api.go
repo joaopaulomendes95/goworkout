@@ -11,7 +11,7 @@ import (
 	"github.com/strangecousinwst/goworkout/internal/utils"
 )
 
-type TokenHandler struct {
+type TokenAPI struct {
 	tokenStore store.TokenStore
 	userStore  store.UserStore
 	logger     *log.Logger
@@ -22,15 +22,15 @@ type createTokenRequest struct {
 	Password string `json:"password"`
 }
 
-func NewTokenHandler(tokenStore store.TokenStore, userStore store.UserStore, logger *log.Logger) *TokenHandler {
-	return &TokenHandler{
+func NewTokenAPI(tokenStore store.TokenStore, userStore store.UserStore, logger *log.Logger) *TokenAPI {
+	return &TokenAPI{
 		tokenStore: tokenStore,
 		userStore:  userStore,
 		logger:     logger,
 	}
 }
 
-func (h *TokenHandler) HandleCreateToken(w http.ResponseWriter, r *http.Request) {
+func (h *TokenAPI) HandleCreateToken(w http.ResponseWriter, r *http.Request) {
 	var req createTokenRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 

@@ -46,8 +46,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.Get("/login", handlers.LoginWebHandler)
 	r.Post("/login", handlers.LoginWebHandler)
-	r.Get("/signup", handlers.SignupWebHandler(s.Middleware.UserStore))
-	r.Post("/signup", handlers.SignupWebHandler(s.Middleware.UserStore))
+	r.Get("/signup", handlers.SignupWebHandler())
+	r.Post("/signup", handlers.SignupWebHandler())
 
 	r.Get("/", handlers.HelloWebHandler)
 	r.Get("/health", s.healthHandler)

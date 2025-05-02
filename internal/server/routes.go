@@ -45,6 +45,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Get("/workouts/{id}/edit", s.Middleware.RequireUser(handlers.WorkoutEditHandler(s.WorkoutStore)))
 		r.Post("/workouts/{id}/edit", s.Middleware.RequireUser(handlers.WorkoutEditHandler(s.WorkoutStore)))
 		r.Get("/workouts", s.Middleware.RequireUser(handlers.WorkoutListHandler(s.WorkoutStore)))
+		r.Get("/workouts/{id}", s.Middleware.RequireUser(handlers.WorkoutDetailHandler(s.WorkoutStore)))
 
 		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleGetWorkoutByID))
 		r.Post("/workouts", s.Middleware.RequireUser(s.WorkoutHandler.HandleCreateWorkout))

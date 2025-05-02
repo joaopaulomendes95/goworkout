@@ -170,3 +170,44 @@ func WorkoutListHandler(workoutStore store.WorkoutStore) http.HandlerFunc {
 		}
 	}
 }
+
+// Add this handler for viewing workout details
+func WorkoutDetailHandler(workoutStore store.WorkoutStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get user
+		user := middleware.GetUser(r)
+		if user == nil || user == store.AnonymousUser {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		// Get workout ID from URL
+		idParam := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idParam)
+		if err != nil {
+			log.Printf("Invalid workout ID: %v", err)
+			http.Error(w, "Invalid workout ID", http.StatusBadRequest)
+			return
+		}
+
+		// Fetch workout from database
+		workout, err := workoutStore.GetWorkoutByID(id)
+		if err != nil {
+			log.Printf("Error fetching workout: %v", err)
+			http.Error(w, "Workout not found", http.StatusNotFound)
+			return
+		}
+
+		// Ensure user owns this workout
+		if workout.UserID != user.ID {
+			http.Error(w, "Not authorized", http.StatusForbidden)
+			return
+		}
+
+		// Render the workout detail template
+		err = web.WorkoutDetail(*workout).Render(r.Context(), w)
+		if err != nil {
+			log.Printf("Error rendering workout detail: %v", err)
+		}
+	}
+}

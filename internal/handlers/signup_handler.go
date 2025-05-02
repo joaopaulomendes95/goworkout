@@ -1,16 +1,17 @@
 package handlers
 
 import (
-	"bytes"
-	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/strangecousinwst/goworkout/cmd/web"
+	"github.com/strangecousinwst/goworkout/internal/store"
+	"github.com/strangecousinwst/goworkout/internal/tokens"
 )
 
 // SignupWebHandler handles both GET and POST requests for /signup
-func SignupWebHandler() http.HandlerFunc {
+func SignupWebHandler(userStore store.UserStore, tokenStore store.TokenStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			err := r.ParseForm()
@@ -19,59 +20,73 @@ func SignupWebHandler() http.HandlerFunc {
 				return
 			}
 
-			// Just collect form data - let the API handle validation
-			requestBody := map[string]string{
-				"username": r.FormValue("username"),
-				"email":    r.FormValue("email"),
-				"password": r.FormValue("password"),
-				"bio":      r.FormValue("bio"),
+			username := r.FormValue("username")
+			email := r.FormValue("email")
+			password := r.FormValue("password")
+			bio := r.FormValue("bio")
+
+			// Validate inputs - you can add more validation rules if needed
+			if username == "" || email == "" || password == "" {
+				web.SignupForm("All fields are required").Render(r.Context(), w)
+				return
 			}
 
-			jsonData, err := json.Marshal(requestBody)
+			// Check if username exists
+			existingUser, err := userStore.GetUserByUsername(username)
 			if err != nil {
-				log.Printf("Error marshaling user data: %v", err)
-				web.SignupForm("Something went wrong").Render(r.Context(), w)
+				log.Printf("Error checking username: %v", err)
+				web.SignupForm("Error creating account").Render(r.Context(), w)
 				return
 			}
 
-			// Forward to your API - let it handle validation
-			resp, err := http.Post(
-				"http:/localhost:8080/users", // Use relative path for better maintainability
-				"application/json",
-				bytes.NewBuffer(jsonData),
-			)
+			if existingUser != nil {
+				web.SignupForm("Username already taken").Render(r.Context(), w)
+				return
+			}
 
+			// Create user
+			user := &store.User{
+				Username: username,
+				Email:    email,
+				Bio:      bio,
+			}
+
+			// Set password (this handles the hashing)
+			err = user.PasswordHash.Set(password)
 			if err != nil {
-				log.Printf("API request error: %v", err)
-				web.SignupForm("Error connecting to server").Render(r.Context(), w)
-				return
-			}
-			defer resp.Body.Close()
-
-			// Handle validation errors from API
-			if resp.StatusCode == http.StatusBadRequest {
-				var errorResp struct {
-					Error string `json:"error"`
-				}
-
-				if err := json.NewDecoder(resp.Body).Decode(&errorResp); err == nil {
-					web.SignupForm(errorResp.Error).Render(r.Context(), w)
-				} else {
-					web.SignupForm("Invalid form data").Render(r.Context(), w)
-				}
+				log.Printf("Error hashing password: %v", err)
+				web.SignupForm("Error creating account").Render(r.Context(), w)
 				return
 			}
 
-			// Other error handling (same as before)
-			if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-				web.SignupForm("Failed to create user").Render(r.Context(), w)
+			// Insert user into database
+			err = userStore.CreateUser(user)
+			if err != nil {
+				log.Printf("Error creating user: %v", err)
+				web.SignupForm("Error creating account").Render(r.Context(), w)
 				return
 			}
 
-			// Success - authenticate and redirect (same as before)
-			// ...login logic from previous implementation...
+			// Create authentication token
+			token, err := tokenStore.CreateNewToken(user.ID, 24*time.Hour, tokens.ScopeAuth)
+			if err != nil {
+				log.Printf("Error creating token: %v", err)
+				// User created but token failed - redirect to login
+				http.Redirect(w, r, "/login?msg=account_created", http.StatusSeeOther)
+				return
+			}
 
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			// Set auth cookie
+			http.SetCookie(w, &http.Cookie{
+				Name:     "auth_token",
+				Value:    token.PlainText,
+				Path:     "/",
+				Expires:  token.Expiry,
+				HttpOnly: true,
+			})
+
+			// Redirect to dashboard
+			http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 			return
 		}
 

@@ -31,6 +31,7 @@ templ LoginForm(errorMsg string) {
     }
 }
 
+// Complete the SignupForm that was incomplete
 templ SignupForm(errorMsg string) {
     @Base() {
         <div class="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow-md">
@@ -55,6 +56,11 @@ templ SignupForm(errorMsg string) {
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                     <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                         name="password" type="password" placeholder="Create a password" required />
+                </div>
+                <div>
+                    <label for="bio" class="block text-sm font-medium text-gray-700">Bio (Optional)</label>
+                    <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                        name="bio" placeholder="Tell us about yourself"></textarea>
                 </div>
                 <button type="submit" class="w-full bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
                     Create Account

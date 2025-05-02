@@ -40,14 +40,22 @@ func (um *UserMiddleware) Authenticate(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 
 		if authHeader == "" {
+			cookie, err := r.Cookie("auth_token")
+			if err == nil {
+				authHeader = "Bearer " + cookie.Value
+			}
+		}
+
+		if authHeader == "" {
 			r = SetUser(r, store.AnonymousUser)
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		headerParts := strings.SplitN(authHeader, " ", 2)
+		headerParts := strings.Split(authHeader, " ")
 		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "invalid authorization header"})
+			r = SetUser(r, store.AnonymousUser)
+			next.ServeHTTP(w, r)
 			return
 		}
 

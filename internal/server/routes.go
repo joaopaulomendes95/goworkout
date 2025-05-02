@@ -38,24 +38,23 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(s.Middleware.Authenticate)
 
+		r.Get("/dashboard", s.Middleware.RequireUser(handlers.DashboardHandler(s.WorkoutStore)))
+
 		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleGetWorkoutByID))
 		r.Post("/workouts", s.Middleware.RequireUser(s.WorkoutHandler.HandleCreateWorkout))
 		r.Put("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleUpdateWorkoutByID))
 		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutHandler.HandleDeleteWorkoutByID))
 	})
 
-	r.Get("/login", handlers.LoginWebHandler)
-	r.Post("/login", handlers.LoginWebHandler)
-	r.Get("/signup", handlers.SignupWebHandler())
-	r.Post("/signup", handlers.SignupWebHandler())
+	r.Get("/login", handlers.LoginWebHandler(s.UserStore, s.TokenStore))
+	r.Post("/login", handlers.LoginWebHandler(s.UserStore, s.TokenStore))
+	r.Get("/signup", handlers.SignupWebHandler(s.UserStore, s.TokenStore))
+	r.Post("/signup", handlers.SignupWebHandler(s.UserStore, s.TokenStore))
 
 	r.Get("/", handlers.HelloWebHandler)
 	r.Get("/health", s.healthHandler)
 	r.Post("/users", s.UserHandler.HandleRegisterUser)
 	r.Post("/tokens/authentication", s.TokenHandler.HandleCreateToken)
-
-	r.Get("/login", handlers.LoginWebHandler)
-	r.Post("/login", handlers.LoginWebHandler)
 
 	r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
 	r.Post("/hello", handlers.HelloWebHandler)

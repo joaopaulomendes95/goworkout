@@ -23,9 +23,10 @@ type UserHandler struct {
 	logger    *log.Logger
 }
 
-func NewUserHandler(userStore store.UserStore) *UserHandler {
+func NewUserHandler(userStore store.UserStore, logger *log.Logger) *UserHandler {
 	return &UserHandler{
 		userStore: userStore,
+		logger:    logger,
 	}
 }
 

@@ -24,6 +24,9 @@ type Server struct {
 	WorkoutHandler *api.WorkoutHandler
 	UserHandler    *api.UserHandler
 	TokenHandler   *api.TokenHandler
+	WorkoutStore   *store.PostgresWorkoutStore
+	UserStore      *store.PostgresUserStore
+	TokenStore     *store.PostgresTokenStore
 	Middleware     middleware.UserMiddleware
 	db             database.Service
 }
@@ -54,8 +57,8 @@ func NewServer() *http.Server {
 	tokenStore := store.NewPostgresTokenStore(pgDB)
 
 	// TODO: Implement handlers
-	workoutHandler := api.NewWorkoutHandler(workoutStore)
-	userHandler := api.NewUserHandler(userStore)
+	workoutHandler := api.NewWorkoutHandler(workoutStore, logger)
+	userHandler := api.NewUserHandler(userStore, logger)
 	tokenHandler := api.NewTokenHandler(tokenStore, userStore, logger)
 	middlewareHandler := middleware.UserMiddleware{UserStore: userStore}
 
@@ -65,6 +68,9 @@ func NewServer() *http.Server {
 		WorkoutHandler: workoutHandler,
 		UserHandler:    userHandler,
 		TokenHandler:   tokenHandler,
+		WorkoutStore:   workoutStore,
+		UserStore:      userStore,
+		TokenStore:     tokenStore,
 		Middleware:     middlewareHandler,
 		db:             dbService,
 	}

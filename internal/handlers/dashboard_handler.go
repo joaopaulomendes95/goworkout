@@ -13,8 +13,14 @@ import (
 func DashboardHandler(workoutStore store.WorkoutStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := middleware.GetUser(r)
+
 		var workouts []store.Workout
 		var err error
+
+		if user == nil && user == store.AnonymousUser {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
 
 		if user != nil && user != store.AnonymousUser {
 			// Get the user's workouts
@@ -29,7 +35,6 @@ func DashboardHandler(workoutStore store.WorkoutStore) http.HandlerFunc {
 		err = web.Dashboard(workouts).Render(r.Context(), w)
 		if err != nil {
 			log.Printf("Error rendering dashboard: %v", err)
-			http.Error(w, "Error rendering page", http.StatusInternalServerError)
 		}
 	}
 }

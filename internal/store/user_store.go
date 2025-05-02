@@ -88,7 +88,7 @@ func (s *PostgresUserStore) CreateUser(user *User) error {
 		query,
 		user.Username,
 		user.Email,
-		user.PasswordHash,
+		user.PasswordHash.hash,
 		user.Bio,
 	).Scan(
 		&user.ID,

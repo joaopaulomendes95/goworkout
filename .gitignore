@@ -18,22 +18,15 @@
 go.work
 tmp/
 
-# IDE specific files
-.vscode
-.idea
-
 # .env file
 .env
 
 # Project build
 main
-*templ.go
 
 # OS X generated file
 .DS_Store
 
-
-# Tailwind CSS
-cmd/web/assets/css/output.css
-tailwindcss
-
+# IDE specific files
+.vscode
+.idea

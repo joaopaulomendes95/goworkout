@@ -3,12 +3,9 @@ package server
 import (
 	"net/http"
 
-	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/strangecousinwst/goworkout/cmd/web"
-	"github.com/strangecousinwst/goworkout/internal/handlers"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -25,90 +22,18 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	// Static assets
-	fileServer := http.FileServer(http.FS(web.Files))
-	r.Handle("/assets/*", fileServer)
+	r.Group(func(r chi.Router) {
+		r.Use(s.Middleware.Authenticate)
 
-	// Web routes
-	s.registerWebRoutes(r)
+		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleGetWorkoutByID))
+		r.Post("/workouts/", s.Middleware.RequireUser(s.WorkoutAPI.HandleCreateWorkout))
+		r.Put("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleUpdateWorkoutByID))
+		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleDeleteWorkoutByID))
+	})
 
-	// API routes with version
-	s.registerAPIRoutes(r)
-
-	r.Get("/login", handlers.LoginWebHandler(s.UserStore, s.TokenStore))
-	r.Post("/login", handlers.LoginWebHandler(s.UserStore, s.TokenStore))
-	r.Get("/signup", handlers.SignupWebHandler(s.UserStore, s.TokenStore))
-	r.Post("/signup", handlers.SignupWebHandler(s.UserStore, s.TokenStore))
-
-	r.Get("/", handlers.HelloWebHandler)
 	r.Get("/health", s.healthHandler)
 	r.Post("/users", s.UserAPI.HandleRegisterUser)
 	r.Post("/tokens/authentication", s.TokenAPI.HandleCreateToken)
 
-	r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
-	r.Post("/hello", handlers.HelloWebHandler)
-
 	return r
-}
-
-func (s *Server) registerWebRoutes(r chi.Router) {
-	r.Group(func(r chi.Router) {
-		r.Use(s.Middleware.Authenticate)
-		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleGetWorkoutByID))
-		r.Post("/workouts", s.Middleware.RequireUser(s.WorkoutAPI.HandleCreateWorkout))
-		r.Put("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleUpdateWorkoutByID))
-		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleDeleteWorkoutByID))
-	})
-	// HTML routes
-	// r.Get("/login", web.LoginWebHandler)
-	// r.Post("/login", web.LoginWebHandler)
-	// r.Get("/", web.DashboardHandler) // Main dashboard
-	// r.Get("/web", templ.Handler(web.HelloForm()).ServeHTTP)
-	// r.Post("/hello", web.HelloWebHandler)
-
-	// // Add workout-related web routes
-	// r.Get("/workouts", web.WorkoutListHandler)
-	// r.Get("/workouts/{id}", web.WorkoutDetailHandler)
-	// r.Get("/workouts/create", web.WorkoutCreateHandler)
-	// // etc...
-	// Group routs and stuff here
-}
-
-// could add a version prefix here for example
-// this handlers return API responses
-func (s *Server) registerAPIRoutes(r chi.Router) {
-	r.Group(func(r chi.Router) {
-		r.Use(s.Middleware.Authenticate)
-
-		r.Get("/dashboard", s.Middleware.RequireUser(handlers.DashboardHandler(s.WorkoutStore)))
-
-		r.Get("/workouts/create", s.Middleware.RequireUser(handlers.WorkoutCreateHandler(s.WorkoutStore)))
-		r.Post("/workouts/create", s.Middleware.RequireUser(handlers.WorkoutCreateHandler(s.WorkoutStore)))
-		r.Get("/workouts/{id}/edit", s.Middleware.RequireUser(handlers.WorkoutEditHandler(s.WorkoutStore)))
-		r.Post("/workouts/{id}/edit", s.Middleware.RequireUser(handlers.WorkoutEditHandler(s.WorkoutStore)))
-		r.Get("/workouts", s.Middleware.RequireUser(handlers.WorkoutListHandler(s.WorkoutStore)))
-		r.Get("/workouts/{id}", s.Middleware.RequireUser(handlers.WorkoutDetailHandler(s.WorkoutStore)))
-	})
-
-	// API routes with version prefix
-	// r.Route("/api/v1", func(r chi.Router) {
-	// 	// Auth
-	// 	r.Post("/login", s.APIHandler.HandleLogin)
-	// 	r.Post("/register", s.UserHandler.HandleRegisterUser)
-
-	// 	// User management
-	// 	r.Route("/users", func(r chi.Router) {
-	// 		r.Get("/", s.UserHandler.HandleGetUsers)
-	// 		r.Post("/", s.UserHandler.HandleCreateUser)
-	// 		r.Get("/{id}", s.UserHandler.HandleGetUser)
-	// 		// etc...
-	// 	})
-
-	// 	// Workout management
-	// 	r.Route("/workouts", func(r chi.Router) {
-	// 		r.Get("/", s.WorkoutHandler.HandleGetWorkouts)
-	// 		r.Post("/", s.WorkoutHandler.HandleCreateWorkout)
-	// 		// etc...
-	// 	})
-	// })
 }

@@ -11,5 +11,11 @@ services:
     volumes:
       - psql_volume_goworkout:/var/lib/postgresql/data
 
+  backend_goworkout:
+    image: golang:latest
+    restart: unless-stopped
+  ports:  
+    - "${GOWORKOUT_DB_PORT}:8080"
+
 volumes:
   psql_volume_goworkout:

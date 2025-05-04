@@ -1,17 +1,18 @@
+version: "3.8"
+
 services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: prod
+      dockerfile: Dockerfile.backend
     restart: unless-stopped
     ports:
-      - ${PORT}:${PORT}
+      - "${PORT}:${PORT}"
     environment:
       APP_ENV: ${APP_ENV}
       PORT: ${PORT}
-      GOWORKOUT_DB_HOST: ${GOWORKOUT_DB_HOST}
-      GOWORKOUT_DB_PORT: ${GOWORKOUT_DB_PORT}
+      GOWORKOUT_DB_HOST: psql_goworkout
+      GOWORKOUT_DB_PORT: 5432
       GOWORKOUT_DB_DATABASE: ${GOWORKOUT_DB_DATABASE}
       GOWORKOUT_DB_USERNAME: ${GOWORKOUT_DB_USERNAME}
       GOWORKOUT_DB_PASSWORD: ${GOWORKOUT_DB_PASSWORD}
@@ -21,18 +22,25 @@ services:
         condition: service_healthy
     networks:
       - goworkout
+
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: frontend
+      dockerfile: Dockerfile.frontend
     restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: production
+      PORT: 5173
     depends_on:
       - app
-    ports:
-      - 5173:5173
     networks:
       - goworkout
+    # Add extra_hosts to make localhost in the container point to the host machine
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   psql_goworkout:
     image: postgres:latest
     restart: unless-stopped
@@ -45,7 +53,11 @@ services:
     volumes:
       - psql_volume_goworkout:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${GOWORKOUT_DB_USERNAME} -d ${GOWORKOUT_DB_DATABASE}'"]
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${GOWORKOUT_DB_USERNAME} -d ${GOWORKOUT_DB_DATABASE}'",
+        ]
       interval: 5s
       timeout: 5s
       retries: 3

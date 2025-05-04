@@ -1,0 +1,68 @@
+services:
+  app:
+    image: golang:1.24.2-alpine
+    working_dir: /app
+    command: sh -c "go mod download && go run cmd/app/main.go"
+    volumes:
+      - .:/app
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      APP_ENV: development
+      PORT: ${PORT}
+      GOWORKOUT_DB_HOST: psql_goworkout
+      GOWORKOUT_DB_PORT: 5432
+      GOWORKOUT_DB_DATABASE: ${GOWORKOUT_DB_DATABASE}
+      GOWORKOUT_DB_USERNAME: ${GOWORKOUT_DB_USERNAME}
+      GOWORKOUT_DB_PASSWORD: ${GOWORKOUT_DB_PASSWORD}
+      GOWORKOUT_DB_SCHEMA: ${GOWORKOUT_DB_SCHEMA}
+    depends_on:
+      psql_goworkout:
+        condition: service_healthy
+    networks:
+      - goworkout
+
+  frontend:
+    image: node:20
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    environment:
+      PUBLIC_API_URL: http://localhost:${PORT}
+      NODE_ENV: development
+    depends_on:
+      - app
+    networks:
+      - goworkout
+
+  psql_goworkout:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${GOWORKOUT_DB_DATABASE}
+      POSTGRES_USER: ${GOWORKOUT_DB_USERNAME}
+      POSTGRES_PASSWORD: ${GOWORKOUT_DB_PASSWORD}
+    ports:
+      - "${GOWORKOUT_DB_PORT}:5432"
+    volumes:
+      - psql_volume_goworkout:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${GOWORKOUT_DB_USERNAME} -d ${GOWORKOUT_DB_DATABASE}'",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - goworkout
+
+volumes:
+  psql_volume_goworkout:
+networks:
+  goworkout:

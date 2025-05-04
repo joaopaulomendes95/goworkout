@@ -1,0 +1,39 @@
+FROM node:20 AS build
+# Set working directory to /frontend to match your structure
+WORKDIR /frontend
+# Copy package files
+COPY frontend/package*.json ./
+RUN npm install
+# Install the node adapter
+RUN npm install --save-dev @sveltejs/adapter-node
+# Copy the rest of the frontend code
+COPY frontend/. ./
+# Build the app
+RUN npm run build
+
+FROM node:20-slim
+WORKDIR /app
+# Copy the build output from the correct location
+COPY --from=build /frontend/build ./
+# Copy package.json for production dependencies
+COPY --from=build /frontend/package.json ./
+# Only install production dependencies
+RUN npm install --omit=dev
+ENV NODE_ENV=production
+# Use port 5173 to match development
+ENV PORT=5173
+EXPOSE 5173
+# Create a startup script that modifies the API URL for Docker networking
+RUN echo '#!/bin/sh\n\
+  # Create a modified version of your API module\n\
+  mkdir -p /app/server/chunks\n\
+  grep -r "const API = " /app --include="*.js" | while read -r file; do\n\
+  filename=$(echo $file | cut -d ":" -f 1)\n\
+  echo "Modifying $filename"\n\
+  # Replace localhost with host.docker.internal for Docker networking\n\
+  sed -i "s|const API = .http://localhost:8080.|const API = \"http://app:8080\"|g" $filename\n\
+  done\n\
+  echo "Starting server on port 5173"\n\
+  node .' > /app/start.sh && chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]

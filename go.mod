@@ -3,7 +3,6 @@ module github.com/strangecousinwst/goworkout
 go 1.24.2
 
 require (
-	github.com/a-h/templ v0.3.857
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/cors v1.2.1
 	github.com/jackc/pgx/v5 v5.7.4
@@ -13,7 +12,6 @@ require (
 )
 
 require (
-	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect

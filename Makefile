@@ -1,20 +1,16 @@
-# Simple Makefile for a Go project
-
 # Build the application
 all: build test
-tailwind-install:
-	@if [ ! -f tailwindcss ]; then curl -sL https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 -o tailwindcss; fi
-	
-	@chmod +x tailwindcss
 
-build: tailwind-install
+build:
 	@echo "Building..."
-	@./tailwindcss -i cmd/web/styles/input.css -o cmd/web/assets/css/output.css
+
 	@go build -o main cmd/app/main.go
 
 # Run the application
 run:
 	@go run cmd/app/main.go
+	@npm install --prefer-offline --no-fund --prefix ./frontend
+	@npm run dev --prefix ./frontend
 # Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \
@@ -64,4 +60,4 @@ watch:
             fi; \
         fi
 
-.PHONY: all build run test clean watch tailwind-install docker-run docker-down itest
+.PHONY: all build run test clean watch docker-run docker-down itest

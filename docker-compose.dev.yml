@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   app:
     image: golang:1.24.2-alpine
@@ -25,18 +27,21 @@ services:
   frontend:
     image: node:20
     working_dir: /app
+    # Use host.docker.internal to access the host machine
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     volumes:
       - ./frontend:/app
     ports:
       - "5173:5173"
     environment:
-      PUBLIC_API_URL: http://localhost:${PORT}
       NODE_ENV: development
     depends_on:
       - app
     networks:
       - goworkout
+    # Add extra_hosts to make localhost in the container point to the host machine
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   psql_goworkout:
     image: postgres:latest

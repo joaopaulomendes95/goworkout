@@ -1,77 +1,169 @@
- # GoWorkout Application
+# GoWorkout Application
 
-This README provides instructions for running the GoWorkout application in both development and production environments.
+Instructions for running GoWorkout in development and production.
 
-## Development Environment
+---
+
+## Development
 
 ### Prerequisites
 
-- Docker and Docker Compose installed
-- Git (to clone the repository)
+- Docker & Docker Compose
+- Git
 
-### Setup and Run
+### Setup
 
-1. Clone the repository:
+1. **Clone the repository**
 
    ```bash
    git clone <repository-url>
    cd goworkout
-     2. Create a .env file in the root directory with the following content:
    ```
 
- PORT=8080
-APP_ENV=local
-GOWORKOUT_DB_HOST=localhost
-GOWORKOUT_DB_PORT=5432
-GOWORKOUT_DB_DATABASE=goworkout
-GOWORKOUT_DB_USERNAME=postgres
-GOWORKOUT_DB_PASSWORD=postgres
-GOWORKOUT_DB_SCHEMA=public
-   3. Start the development environment:
+2. **Create `.env` in the root:**
 
- docker-compose -f docker-compose.dev.yml up
- Note: If you want to use the default filename, you can rename docker-compose.dev.yml to docker-compose.yml and then simply run:
+   ```
+   PORT=8080
+   APP_ENV=local
+   GOWORKOUT_DB_HOST=localhost
+   GOWORKOUT_DB_PORT=5432
+   GOWORKOUT_DB_DATABASE=goworkout
+   GOWORKOUT_DB_USERNAME=postgres
+   GOWORKOUT_DB_PASSWORD=postgres
+   GOWORKOUT_DB_SCHEMA=public
+   ```
 
- docker-compose up
- Docker Compose by default looks for a file named docker-compose.yml or docker-compose.yaml in the current directory.  4. Access the application:
-▪ Frontend: <http://localhost:5173>  ▪ Backend API: <http://localhost:8080>  ▪ Database: PostgreSQL running on port 5432  5. To stop the development environment:
+3. **Frontend API calls:**  
+   Use Docker service name (`app`) instead of `localhost`:
 
- docker-compose -f docker-compose.dev.yml down
- Or if using the default filename:
+   ```ts
+   // Use for Docker development
+   const API = "http://app:8080";
+   // Not: const API = 'http://localhost:8080';
+   ```
 
- docker-compose down
+4. **Start development:**
 
-Development Notes
-• The frontend uses SvelteKit with hot-reloading enabled  • The backend uses Go with Chi router  • Changes to the frontend and backend code will automatically reload
-Production Environment
-Prerequisites
-• Docker and Docker Compose installed  • Git (to clone the repository)
-Setup and Run 1. Clone the repository:
+   - From root:
 
- git clone <repository-url>
-cd goworkout
-   2. Create a .env file in the root directory with the following content:
+     ```bash
+     docker-compose -f docker-compose.dev.yml up
+     ```
 
- PORT=8080
-APP_ENV=production
-GOWORKOUT_DB_HOST=localhost
-GOWORKOUT_DB_PORT=5432
-GOWORKOUT_DB_DATABASE=goworkout
-GOWORKOUT_DB_USERNAME=postgres
-GOWORKOUT_DB_PASSWORD=postgres
-GOWORKOUT_DB_SCHEMA=public
-   3. Start the production environment:
+   - From frontend:
 
- docker-compose -f docker-compose.prod.yml up --build
-   4. Access the application:
-▪ Frontend: <http://localhost:5173>  ▪ Backend API: <http://localhost:8080>  ▪ Database: PostgreSQL running on port 5432  5. To stop the production environment:
+     ```bash
+     npm run start
+     ```
 
- docker-compose -f docker-compose.prod.yml down
-   6. To completely clean up (remove images, volumes, etc.):
+   - If using `docker-compose.yml`:
 
- docker-compose -f docker-compose.prod.yml down --rmi all --volumes --remove-orphans
+     ```bash
+     docker-compose up
+     ```
 
-Production Notes
-• The frontend is built for production and served using Node.js  • The backend is compiled to a binary for optimal performance  • The database data is persisted in a Docker volume
-Differences Between Development and Production
-• Development: Frontend and backend run in development mode with hot-reloading  • Production: Frontend is built and optimized, backend is compiled to a binary  • Both environments use the same ports and configuration for consistency
+5. **Access:**
+
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+   - Backend: [http://localhost:8080](http://localhost:8080)
+   - DB: PostgreSQL on port 5432
+
+6. **Stop:**
+
+   ```bash
+   docker-compose -f docker-compose.dev.yml down
+   # or
+   docker-compose down
+   ```
+
+#### Notes
+
+- Frontend: SvelteKit (hot-reloading)
+- Backend: Go (Chi router)
+- Code changes auto-reload
+- Use `http://app:8080` for API calls from frontend (in Docker)
+- Use `http://localhost:8080` to access backend directly
+
+---
+
+## Production
+
+### Prerequisites
+
+- Docker & Docker Compose
+- Git
+
+### Setup
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd goworkout
+   ```
+
+2. **Create `.env` in the root:**
+
+   ```
+   PORT=8080
+   APP_ENV=production
+   GOWORKOUT_DB_HOST=localhost
+   GOWORKOUT_DB_PORT=5432
+   GOWORKOUT_DB_DATABASE=goworkout
+   GOWORKOUT_DB_USERNAME=postgres
+   GOWORKOUT_DB_PASSWORD=postgres
+   GOWORKOUT_DB_SCHEMA=public
+   ```
+
+3. **Start production:**
+
+   - From root:
+
+     ```bash
+     docker-compose -f docker-compose.prod.yml up --build
+     ```
+
+   - From frontend:
+
+     ```bash
+     npm run start:prod
+     ```
+
+4. **Access:**
+
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+   - Backend: [http://localhost:8080](http://localhost:8080)
+   - DB: PostgreSQL on port 5432
+
+5. **Stop:**
+
+   ```bash
+   docker-compose -f docker-compose.prod.yml down
+   ```
+
+6. **Clean up everything:**
+
+   ```bash
+   docker-compose -f docker-compose.prod.yml down --rmi all --volumes --remove-orphans
+   ```
+
+#### Notes
+
+- Frontend: Built for production, served via Node.js
+- Backend: Compiled Go binary
+- Database persists in Docker volume
+- API routing handled automatically
+
+---
+
+## Dev vs Production
+
+| Aspect             | Development                            | Production                        |
+| ------------------ | -------------------------------------- | --------------------------------- |
+| Frontend           | SvelteKit, hot-reloading               | Built & optimized, served by Node |
+| Backend            | Go (dev mode, Chi router)              | Compiled Go binary                |
+| API URL (frontend) | <http://app:8080> (Docker service)       | Handled automatically             |
+| DB Persistence     | Docker volume                          | Docker volume                     |
+| Ports              | 5173 (frontend), 8080 (API), 5432 (DB) | Same as development               |
+
+---

@@ -8,4 +8,5 @@ export async function load() {
 	return {
 		loginObject
 	};
-}
+
+};

@@ -1,26 +1,26 @@
 services:
   app:
     build:
-    contex: .
-    dockerfile: Dockerfile
-    target: prod
-  restart: unless-stopped
-  ports:
-    - ${PORT}:${PORT}
-  environment:
-    APP_ENV: ${APP_ENV}
-    PORT: ${PORT}
-    GOWORKOUT_DB_HOST: ${GOWORKOUT_DB_HOST}
-    GOWORKOUT_DB_PORT: ${GOWORKOUT_DB_PORT}
-    GOWORKOUT_DB_DATABASE: ${GOWORKOUT_DB_DATABASE}
-    GOWORKOUT_DB_USERNAME= ${GOWORKOUT_DB_USERNAME}
-    GOWORKOUT_DB_PASSWORD= ${GOWORKOUT_DB_PASSWORD}
-    GOWORKOUT_DB_SCHEMA= ${GOWORKOUT_DB_SCHEMA}
-  depends_on:
-    psql_goworkout:
-      condition: service_healthy
-  networks:
-    - goworkout
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    restart: unless-stopped
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      APP_ENV: ${APP_ENV}
+      PORT: ${PORT}
+      GOWORKOUT_DB_HOST: ${GOWORKOUT_DB_HOST}
+      GOWORKOUT_DB_PORT: ${GOWORKOUT_DB_PORT}
+      GOWORKOUT_DB_DATABASE: ${GOWORKOUT_DB_DATABASE}
+      GOWORKOUT_DB_USERNAME: ${GOWORKOUT_DB_USERNAME}
+      GOWORKOUT_DB_PASSWORD: ${GOWORKOUT_DB_PASSWORD}
+      GOWORKOUT_DB_SCHEMA: ${GOWORKOUT_DB_SCHEMA}
+    depends_on:
+      psql_goworkout:
+        condition: service_healthy
+    networks:
+      - goworkout
   frontend:
     build:
       context: .
@@ -45,10 +45,10 @@ services:
     volumes:
       - psql_volume_goworkout:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${BLUEPRINT_DB_USERNAME} -d {BLUEPRINT_DB_DATABASE}'"]
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${GOWORKOUT_DB_USERNAME} -d ${GOWORKOUT_DB_DATABASE}'"]
       interval: 5s
       timeout: 5s
-      reties: 3
+      retries: 3
       start_period: 15s
     networks:
       - goworkout

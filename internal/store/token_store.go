@@ -30,6 +30,10 @@ func (t *PostgresTokenStore) CreateNewToken(userID int, ttl time.Duration, scope
 	}
 
 	err = t.Insert(token)
+	if err != nil {
+		return nil, nil
+	}
+
 	return token, nil
 }
 

@@ -65,6 +65,9 @@ func (s *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error)
 	).Scan(
 		&workout.ID,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	for i := range workout.Entries {
 		entry := &workout.Entries[i]

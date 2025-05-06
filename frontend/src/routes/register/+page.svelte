@@ -1,8 +1,14 @@
 <script lang="ts">
-	const { data } = $props();
+	const { form } = $props();
 
-	console.log('Page Data Register', data);
+	console.log('Page Data Register', form);
 </script>
+
+{#if form?.success}
+	<p>Logged in as {form.user.username}!</p>
+{:else if form?.error}
+	<p class="error">{form.error}</p>
+{/if}
 
 <div class="main">
 	<div class="absolute top-4 left-4">Go Workout</div>
@@ -16,16 +22,19 @@
 			<form action="user_register" method="post">
 				<div class="flex flex-col text-center">
 					<label for="username"><b>Username</b></label>
-					<input type="text" placeholder="Enter Username" name="username" required />
+					<input type="text" placeholder="Enter Username" required />
 					<label for="email"><b>Email</b></label>
-					<input type="text" placeholder="Enter Email" name="email" required />
+					<input type="text" placeholder="Enter Email" required />
 					<label for="password"><b>Password</b></label>
-					<input type="password" placeholder="Enter Password" name="password" required />
+					<input type="password" placeholder="Enter Password" required />
+					<br />
+					<label for="bio"><b>Bio</b></label>
+					<textarea id="bio" placeholder="Write a bio about yourself" required></textarea>
 					<br />
 					<button type="submit">Register</button>
 					<br />
 					<label>
-						<input type="checkbox" checked="checked" name="remember" /> Remember me
+						<input type="checkbox" name="remember" /> Remember me
 					</label>
 				</div>
 			</form>

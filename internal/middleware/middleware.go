@@ -39,6 +39,7 @@ func (um *UserMiddleware) Authenticate(next http.Handler) http.Handler {
 		w.Header().Add("Vary", "Authorization")
 		authHeader := r.Header.Get("Authorization")
 
+		// TODO: passar o cookie
 		if authHeader == "" {
 			cookie, err := r.Cookie("auth_token")
 			if err == nil {

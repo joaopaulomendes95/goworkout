@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-
 	const { data, form } = $props();
 
 	let username = $state('');
 	let password = $state('');
 
 	console.log('Page Data Login', data);
+	$inspect(form);
 </script>
 
 <div class="main">
@@ -19,7 +18,7 @@
 					<h1 class="text-2xl font-semibold tracking-tight">Log in to your account</h1>
 					<p class="text-muted-foreground text-sm">Enter your email below to login your account</p>
 				</div>
-				<form action="users" use:enhance method="post">
+				<form action="?/user_login" method="post">
 					<div class="flex flex-col text-center">
 						<label for="username"><b>Username</b></label>
 						<input
@@ -32,14 +31,15 @@
 						<label for="password"><b>Password</b></label>
 						<input
 							id="password"
-							placeholder="Enter password"
 							name="password"
+							type="password"
+							placeholder="Enter password"
 							required
 							bind:value={password}
 						/>
 						<button type="submit">Login</button>
 						<label>
-							<input type="checkbox" checked="checked" name="remember" /> Remember me
+							<input type="checkbox" checked={false} name="remember" /> Remember me
 						</label>
 					</div>
 					<div class="container">
@@ -64,6 +64,10 @@
 					<p class="text-lg">&ldquo;Postgres is better than Tailwind&rdquo;</p>
 					<footer class="text-sm">Bill Gates</footer>
 				</blockquote>
+			</div>
+			<div>
+				<h1 class="text-2xl text-red-500">{form?.message}</h1>
+				<h1 class="text-2xl text-red-500">{form?.token}</h1>
 			</div>
 		</div>
 	</div>

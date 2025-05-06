@@ -1,13 +1,7 @@
-const API = 'http://localhost:8080';
+const API = 'http://app:8080';
 
 export async function load() {
     return { message: "Please log in" };
-}
-
-interface ApiResponse {
-    sucess: boolean;
-    message: string;
-    token?: string
 }
 
 export const actions = {
@@ -23,22 +17,35 @@ export const actions = {
 
 
         try {
-            const response: ApiResponse = await fetch(`${API}/login`, {
+            const response = await fetch(`${API}/users`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password, bio })
             });
 
+            console.log("Response: ", response);
             const result = await response.json();
 
-            if (response.sucess) {
-                return { success: true, message: 'Login successful', token: result.token };
+            if (response.ok) {
+                return {
+                    success: true,
+                    message: 'Registation successful',
+                    token: result.token,
+                };
             } else {
-                return { success: false, message: result.message || 'Login failed' };
+                return {
+                    success: false,
+                    message: result.message || 'Registation failed',
+                    username, email, bio // Return data to repopulate form
+                };
             }
 
         } catch (e) {
-            return { success: false, message: 'Network error' };
+            return {
+                success: false,
+                message: 'Network error',
+                username, email, bio // Return data to repopulate form
+            };
         }
     }
 };

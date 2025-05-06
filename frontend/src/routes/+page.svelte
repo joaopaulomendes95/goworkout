@@ -1,22 +1,20 @@
 <script lang="ts">
 	const { data } = $props();
 
-	let password = $state('');
-	let username = $state('');
-	let email = $state('');
-	let bio = $state('');
-
 	console.log('page Data', data);
 
 	let health = data.health;
-	let user = data.user;
+	// let user = data.user;
 	console.log('health', health);
 </script>
 
 <main class="flex min-h-[100vh] flex-col items-center justify-center">
 	<h1>Homepage</h1>
-	<button>Login</button>
-	<button>Register</button>
+
+	<nav>
+		<a href="/login">Login</a>
+		<a href="/register">Register</a>
+	</nav>
 </main>
 
 <!-- <main class="flex min-h-[100vh] flex-col items-center justify-center"> -->
@@ -42,6 +40,3 @@
 <!-- 		<button type="submit" class="rounded-xl bg-orange-300 p-2">Register</button> -->
 <!-- 	</form> -->
 <!-- </main> -->
-
-<style>
-</style>

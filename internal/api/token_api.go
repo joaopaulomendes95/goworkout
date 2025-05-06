@@ -33,7 +33,6 @@ func NewTokenAPI(tokenStore store.TokenStore, userStore store.UserStore, logger 
 func (h *TokenAPI) HandleCreateToken(w http.ResponseWriter, r *http.Request) {
 	var req createTokenRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
-
 	if err != nil {
 		h.logger.Printf("ERROR: createTokenRequest: %v", err)
 		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"error": "Invalid request payload"})

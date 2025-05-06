@@ -1,5 +1,10 @@
 <script lang="ts">
-	const { data } = $props();
+	import { enhance } from '$app/forms';
+
+	const { data, form } = $props();
+
+	let username = $state('');
+	let password = $state('');
 
 	console.log('Page Data Login', data);
 </script>
@@ -11,15 +16,27 @@
 		<div class="cabecalho">
 			<div class="flex flex-col space-y-2 text-center">
 				<div class="flex flex-col space-y-2 text-center">
-					<h1 class="text-2xl font-semibold tracking-tight">Login to your account</h1>
+					<h1 class="text-2xl font-semibold tracking-tight">Log in to your account</h1>
 					<p class="text-muted-foreground text-sm">Enter your email below to login your account</p>
 				</div>
-				<form action="user_login" method="post">
+				<form action="users" use:enhance method="post">
 					<div class="flex flex-col text-center">
 						<label for="username"><b>Username</b></label>
-						<input type="text" placeholder="Enter Username" name="username" required />
+						<input
+							id="username"
+							placeholder="Enter Username"
+							name="username"
+							required
+							bind:value={username}
+						/>
 						<label for="password"><b>Password</b></label>
-						<input type="password" placeholder="Enter password" name="password" required />
+						<input
+							id="password"
+							placeholder="Enter password"
+							name="password"
+							required
+							bind:value={password}
+						/>
 						<button type="submit">Login</button>
 						<label>
 							<input type="checkbox" checked="checked" name="remember" /> Remember me
@@ -30,6 +47,11 @@
 						<span class="psw">Forgot <a href="placeholder">password?</a></span>
 					</div>
 				</form>
+
+				{#if form?.success === false}
+					<p class="mt-4 text-red-500">{form.message}</p>
+				{/if}
+
 				<p class="text-muted-foreground px-8 text-center text-sm">
 					Dont have account yet?
 					<a href="/register" class="hover:text-primary underline underline-offset-4">

@@ -1,3 +1,15 @@
+<script lang="ts">
+	const data = $props();
+
+	$effect(() => {
+		const getData = async () => {
+			const response = await fetch('/api/workouts');
+			const data = await response.json();
+			return data;
+		};
+	});
+</script>
+
 <main class="flex min-h-[100vh] flex-col items-center justify-center">
 	<h1>Workout Crud</h1>
 	<div class="workout_with_entries flex min-h-[100vh] flex-col items-center justify-center">
@@ -106,6 +118,17 @@
 				</table>
 				<button>Save/Edit/Delete</button>
 			</form>
+
+			<div>
+				{#each data.workouts as workout (workout.id)}
+					<div>
+						<h2>{workout.title}</h2>
+						<p>{workout.description}</p>
+						<p>Duration: {workout.duration_minutes} minutes</p>
+						<p>Calories Burned: {workout.calories_burned}</p>
+					</div>
+				{/each}
+			</div>
 		</div>
 	</div>
 </main>

@@ -1,58 +1,47 @@
 const API = 'http://app:8080';
 
-// TODO: redirect if sucess
+// TODO: redirect if sucess and store the auth_token
 import { redirect } from '@sveltejs/kit';
+import type { Actions } from './$types';
 
-export async function load() {
-}
 
-export const actions = {
-    user_login: async ({ request, cookies }) => {
+export const actions: Actions = {
+    login: async ({ request, cookies, fetch, locals }) => {
+        // Get form data
         const data = await request.formData();
-        const username = data.get('username');
-        const password = data.get('password');
+        const username = data.get('username')?.toString() || '';
+        const password = data.get('password')?.toString() || '';
 
-        //debugggin
-        console.log("FormData: ", data)
+        // Make API request
+        const response = await fetch(`${API}/tokens/authentication`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
 
+        console.log("Response: ", response);
+        const result = await response.json();
+        console.log("Result: ", result);
 
-        try {
-            const response = await fetch(`${API}/tokens/authentication`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+        if (response.ok && result.token) {
+            locals.token = result.token;
+            console.log('token: ', locals.token)
+            locals.authenticated = true;
+            cookies.set('auth_token', result.token, {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'strict',
+                maxAge: 60 * 60 * 24 // 24 hours
             });
 
-            console.log("Response: ", response);
-            const result = await response.json();
-            console.log("Result: ", result);
-
-
-            if (response.ok) {
-                cookies.set('auth_token', result.token, {
-                    path: '/',
-                    httpOnly: true,
-                    secure: true,
-                });
-                return {
-                    success: true,
-                    message: 'Login successful',
-                    token: result.token,
-                };
-            } else {
-                return {
-                    success: false,
-                    message: result.message || 'login failed',
-                    username // Return data to repopulate form
-                };
-            }
-
-        } catch (e) {
-            return {
-                success: false,
-                message: 'Network error',
-                username // Return data to repopulate form
-            };
+            throw redirect(303, '/');
         }
+
+        // Authentication failed
+        return {
+            success: false,
+            message: result.message || 'authentication failed'
+        };
     }
 };

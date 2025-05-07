@@ -22,7 +22,7 @@
 					<h1 class="text-2xl font-semibold tracking-tight">Log in to your account</h1>
 					<p class="text-muted-foreground text-sm">Enter your email below to login your account</p>
 				</div>
-				<form action="?/user_login" method="post">
+				<form action="?/login" method="post">
 					<div class="flex flex-col text-center">
 						<label for="username"><b>Username</b></label>
 						<input
@@ -68,10 +68,6 @@
 					<p class="text-lg">&ldquo;Postgres is better than Tailwind&rdquo;</p>
 					<footer class="text-sm">Bill Gates</footer>
 				</blockquote>
-			</div>
-			<div>
-				<h1 class="text-2xl text-red-500">{form?.message}</h1>
-				<h1 class="text-2xl text-red-500">{form?.token}</h1>
 			</div>
 		</div>
 	</div>

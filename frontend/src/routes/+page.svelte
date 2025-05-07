@@ -4,7 +4,6 @@
 	console.log('page Data', data);
 
 	let health = data.health;
-	// let user = data.user;
 	console.log('health', health);
 </script>
 

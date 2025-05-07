@@ -1,4 +1,9 @@
+import { get } from 'svelte/store';
+import { token } from '$lib/stores/auth';
+
 const API = 'http://app:8080/workouts';
+const ID = '1'; // Replace with the actual ID you want to fetch
+
 
 type workout = {
     id: number;
@@ -21,14 +26,39 @@ type workoutEntry = {
     oriderIndex: number;
 }
 
+export async function apiRequest({ endpoint: string, options: RequestInit = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+
+    const currentToken = get(token);
+    if (currentToken) {
+        headers['Authorization'] = `Bearer ${currentToken}`;
+    }
+
+    const response = await fetch(`${API}${endpoint}`, {
+        ...options,
+        headers,
+        credentials: 'include'
+    });
+
+    if (!response.ok) {
+
+    }
+
+    return response;
+}
+
 export const load = async () => {
-    const response = await fetch(`${API}/workouts`);
+    // fetch workout id
+    const response = await fetch(`${API}/workouts/${ID}`);
     const workouts = ((await response.json()) as workout[])
+    // const id = response.;
     return {
         workouts: workouts.map
     }
 }
-
 
 export const actions = {
     add_workout: async ({ request }) => {

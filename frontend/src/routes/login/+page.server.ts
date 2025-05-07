@@ -1,13 +1,13 @@
 const API = 'http://app:8080';
 
 // TODO: redirect if sucess
-// import { redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 
 export async function load() {
 }
 
 export const actions = {
-    user_login: async ({ request }) => {
+    user_login: async ({ request, cookies }) => {
         const data = await request.formData();
         const username = data.get('username');
         const password = data.get('password');
@@ -29,6 +29,11 @@ export const actions = {
 
 
             if (response.ok) {
+                cookies.set('auth_token', result.token, {
+                    path: '/',
+                    httpOnly: true,
+                    secure: true,
+                });
                 return {
                     success: true,
                     message: 'Login successful',

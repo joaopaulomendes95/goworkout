@@ -5,8 +5,12 @@
 </script>
 
 <div class="main">
-	<div class="absolute top-4 left-4">Go Workout</div>
-	<button class="absolute top-4 right-4">Register</button>
+	<div class="absolute top-4 left-4">
+		<a href="/">Go Workout</a>
+	</div>
+	<div class="absolute top-4 right-4">
+		<a href="/login">Login</a>
+	</div>
 	<div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px] md:w-[600px]">
 		<div class="cabecalho">
 			<div class="flex flex-col space-y-2 text-center">

@@ -25,7 +25,7 @@
 					<button type="submit">Register</button>
 					<br />
 					<label>
-						<input type="checkbox" checked="checked" name="remember" /> Remember me
+						<input type="checkbox" checked={false} name="remember" /> Remember me
 					</label>
 				</div>
 			</form>

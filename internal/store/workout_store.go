@@ -57,7 +57,7 @@ func (s *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error)
 
 	err = tx.QueryRow(
 		query,
-		workout.ID,
+		workout.UserID,
 		workout.Title,
 		workout.Description,
 		workout.DurationMinutes,

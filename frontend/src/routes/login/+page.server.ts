@@ -28,14 +28,14 @@ export const actions: Actions = {
       console.log('[Login Action] API Response Body:', result);
 
 
-      if (response.ok && result.token) {
-        locals.token = result.token;
+      if (response.ok && result.auth_token && result.auth_token.token) {
+        locals.token = result.auth_token.token;
         if (result.user) { // Assuming login response includes user details
             locals.user = result.user as App.Locals['user'];
         }
         locals.authenticated = true;
         
-        cookies.set('auth_token', result.token, {
+        cookies.set('auth_token', result.auth_token.token, {
           path: '/',
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',

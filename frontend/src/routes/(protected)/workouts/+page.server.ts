@@ -64,21 +64,42 @@ export const actions: Actions = {
       description,
       duration_minutes: parseInt(durationMinutesStr, 10),
       calories_burned: parseInt(caloriesBurnedStr, 10),
-      entries: entries.map((e, idx) => ({ // Ensure order_index and structure match backend
+      entries: entries.map((e, idx) => {
+        // Determine if it's a rep-based or duration-based entry
+        let finalReps = e.reps != null && e.reps > 0 ? e.reps : null;
+        let finalDuration = e.duration_seconds != null && e.duration_seconds > 0 ? e.duration_seconds : null;
+
+        // If both are somehow provided (and positive), prioritize one or make it an error earlier
+        // For now, let's assume UI or prior validation ensures only one is meaningfully filled.
+        // If reps are provided (and > 0), nullify duration.
+        // If duration is provided (and > 0), nullify reps.
+        // If both are 0 or null, the backend constraint will catch it.
+
+        if (finalReps !== null && finalDuration !== null) {
+          // This case should ideally be prevented by UI logic.
+          // For now, let's say we prioritize reps if both are somehow positive.
+          // Or, better, your UI should only allow one to be entered.
+          // For the constraint: if reps has a value, duration MUST be null.
+          finalDuration = null;
+        }
+
+
+        return {
           exercise_name: e.exercise_name,
           sets: e.sets,
-          reps: e.reps != null ? e.reps : null, // Handle potential undefined -> null
-          duration_seconds: e.duration_seconds != null ? e.duration_seconds : null, // Handle potential undefined -> null
-          weight: e.weight != null ? e.weight : 0, // Default weight if not provided, or make it nullable
+          reps: finalReps,
+          duration_seconds: finalDuration,
+          weight: e.weight != null ? e.weight : null, // Send null if not applicable
           notes: e.notes || "",
-          order_index: e.order_index !== undefined ? e.order_index : idx + 1, // Ensure order_index starts from 1 as per curl
-      }))
+          order_index: e.order_index !== undefined ? e.order_index : idx + 1,
+        };
+      })
     };
 
     console.log("[Workouts Action] Sending payload to POST /workouts:", JSON.stringify(newWorkoutPayload, null, 2));
 
     try {
-      const response = await fetch(`${GO_API_URL}/workouts`, { // POST /workouts
+      const response = await fetch(`${GO_API_URL}/workouts/`, { // POST /workouts
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +116,7 @@ export const actions: Actions = {
           title, description, durationMinutes: durationMinutesStr, caloriesBurned: caloriesBurnedStr, entries: entriesString
         });
       }
-      
+
       const createdWorkout = await response.json(); // Backend should return the created workout
       console.log("[Workouts Action] Workout created successfully:", createdWorkout);
 

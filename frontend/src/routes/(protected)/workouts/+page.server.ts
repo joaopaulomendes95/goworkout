@@ -1,22 +1,60 @@
 // frontend/src/routes/(protected)/workouts/+page.server.ts
 import { fail } from '@sveltejs/kit'; // No redirect/error from load, layout handles auth
 import type { Actions, PageServerLoad } from './$types';
- import type { BackendWorkoutEntry } from '$lib/types';
+ import type { BackendWorkout, BackendWorkoutEntry } from '$lib/types';
 
 const GO_API_URL = 'http://app:8080';
 
 // This load function might not fetch workouts anymore if no list endpoint exists.
 // It will mainly ensure the user is authenticated (via the (protected) layout).
 export const load: PageServerLoad = async ({ locals }) => {
-  // Authentication is handled by (protected)/+layout.server.ts
-  // If we reach here, the user is authenticated.
-  // locals.token will be available.
-  
-  // If there's no GET /workouts endpoint to list workouts, we return no workout data here.
-  // The page will primarily be for creating workouts.
-  return {
-    // workouts: [] // Or simply nothing if the page doesn't display a list initially
-  };
+    if (!locals.authenticated || !locals.token) {
+    // This should ideally be caught by the (protected) layout,
+    // but as a safeguard or if you want to return specific data for unauthenticated.
+    // For a protected route, the layout usually handles the redirect.
+    // If we reach here and not authenticated, something is amiss or it's by design.
+    return { workouts: [], error: 'Not authenticated' }; // Or throw redirect
+  }
+
+  try {
+    const response = await fetch(`${GO_API_URL}/workouts/`, { // Ensure trailing slash matches Go route
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${locals.token}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorResult = await response.json().catch(() => ({ error: `API error (${response.status}) fetching workouts.` }));
+      console.error("[Workouts Load] API Error fetching workouts:", response.status, errorResult);
+      return {
+        workouts: [], // Return empty array on error
+        error: errorResult.error || errorResult.message || `Failed to load workouts (status: ${response.status}).`
+      };
+    }
+
+    const data = await response.json(); // Go API returns { workouts: [...] }
+    
+    // Ensure the data structure matches what you expect
+    if (data && Array.isArray(data.workouts)) {
+      return {
+        workouts: data.workouts as BackendWorkout[] // Pass the workouts array to the page
+      };
+    } else {
+      console.error("[Workouts Load] Unexpected data structure from API:", data);
+      return {
+        workouts: [],
+        error: "Unexpected data structure from API."
+      };
+    }
+
+  } catch (e: any) {
+    console.error("[Workouts Load] Network or unexpected error:", e);
+    return {
+      workouts: [],
+      error: 'A network error occurred while fetching workouts. Please try again.'
+    };
+  }
 };
 
 export const actions: Actions = {

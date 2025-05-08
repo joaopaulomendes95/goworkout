@@ -1,3 +1,5 @@
+// Create user
+
 curl -X POST "http://localhost:8080/users" \
      -H "Content-Type: application/json" \
      -d '{
@@ -7,6 +9,9 @@ curl -X POST "http://localhost:8080/users" \
           "bio": "Physical activity noob"
         }'
 
+
+// Create Token
+
 curl -X POST "http://localhost:8080/tokens/authentication" \
      -H "Content-Type: application/json" \
      -d '{
@@ -14,8 +19,10 @@ curl -X POST "http://localhost:8080/tokens/authentication" \
           "password": "SecureP@ssword123"
         }'
 
+// Create workout
+
 curl -X POST "http://localhost:8080/workouts" \
-     -H "Authorization: Bearer 3VGSV7LBT4IVASURIKUOUWOF5WGHOWRXUZA6OLKK7U4ABNCLPVSA" \
+     -H "Authorization: Bearer DRGCJXMFVHMHCYH3WOFTCU6KICLLKCLCG5ZNWFRBIS7AXL3NRFCQ" \
      -H "Content-Type: application/json" \
      -d '{
           "title": "Morning Cardio",
@@ -34,6 +41,7 @@ curl -X POST "http://localhost:8080/workouts" \
           ]
         }'
 
+// Edit workout
 
 curl -X PUT "http://localhost:8080/workouts/{id}" \
      -H "Authorization: Bearer M6BOKTWSQJL74GJJO5OIOMOG3V63MYRIKLUBZ6ILEUQUPCN7472Q" \

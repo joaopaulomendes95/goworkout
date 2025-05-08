@@ -58,7 +58,6 @@ export const actions: Actions = {
       // If so, re-throw it to let SvelteKit handle the client-side redirection.
       if (isRedirect(error)) {
         console.log('[Login Action] Caught redirect, re-throwing:', error.location);
-        console.log('[Login Action] Trying to get token: ', locals.token);
         throw error; // Re-throw the redirect
       }
 

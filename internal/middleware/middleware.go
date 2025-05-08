@@ -38,24 +38,15 @@ func (um *UserMiddleware) Authenticate(next http.Handler) http.Handler {
 		w.Header().Add("Vary", "Authorization")
 		authHeader := r.Header.Get("Authorization")
 
-		// TODO: passar o token
-		if authHeader == "" {
-			cookie, err := r.Cookie("auth_token")
-			if err == nil {
-				authHeader = "Bearer " + cookie.Value
-			}
-		}
-
 		if authHeader == "" {
 			r = SetUser(r, store.AnonymousUser)
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		headerParts := strings.Split(authHeader, " ")
+		headerParts := strings.Split(authHeader, " ") // Bearer <TOKEN>
 		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			r = SetUser(r, store.AnonymousUser)
-			next.ServeHTTP(w, r)
+			utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "invalid authorization header"})
 			return
 		}
 
@@ -73,6 +64,7 @@ func (um *UserMiddleware) Authenticate(next http.Handler) http.Handler {
 
 		r = SetUser(r, user)
 		next.ServeHTTP(w, r)
+		return
 	})
 }
 

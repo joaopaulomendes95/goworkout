@@ -1,16 +1,24 @@
+// frontend/src/app.d.ts
 // See https://svelte.dev/docs/kit/types#app.d.ts
-// for information about these interfaces
+
+import type { BackendUser, BackendWorkout } from '$lib/types';
+
 declare global {
     namespace App {
-        // interface Error {}
         interface Locals {
-            authenticated?: boolean;
+            authenticated: boolean;
             token?: string;
-            user?: number;
+            user?: BackendUser; // Use imported type
         }
-        // interface PageData {}
-        // interface PageState {}
+        interface PageData {
+            user?: BackendUser; // Use imported type
+            authenticated?: boolean;
+            workouts?: BackendWorkout[]; // Use imported type
+            error?: { message: string };
+        }
+        // interface Error {}
         // interface Platform {}
     }
 }
-export { };
+
+export {};

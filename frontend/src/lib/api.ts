@@ -1,39 +1,113 @@
-import { goto } from '$app/navigation';
-import { getToken } from '$lib/auth';
+// Base API URL - Nginx will proxy /api/ to the backend
+const API_BASE_URL = '/api/'; // Assuming Nginx proxies /api/ to http://app:8080/
 
-// Base API URL
-const API_BASE_URL = 'http://app:8080/';
+// Base API request function with authentication
+export async function apiRequest(endpoint: string, options: RequestInit = {}) {
+      const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint.substring(1) : endpoint}`;
 
-// fetch wrapper that adds authentication
-export async function apiRequest<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = getToken();
+  // Get token from cookies (browser)
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+          ...options.headers
+      };
 
+  // Set auth header if exists
   const headers = {
-    'Content-type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-    ...(options.headers || {} )
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+    ...options.headers
   };
 
-  const response = await fetch (`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers
-  });
+        // For CLIENT-SIDE calls that need auth:
+      // This part is tricky if the cookie is HttpOnly.
+      // SvelteKit server-side (load, actions) handles HttpOnly cookies better.
+      if (typeof document !== 'undefined') {
+          const cookieToken = document.cookie
+             .split('; ')
+             .find(row => row.startsWith('auth_token='))
+             ?.split('=')[1];
+          if (cookieToken) {
+              headers['Authorization'] = `Bearer ${cookieToken}`;
+          }
+      }
 
-  // Handle 401 Unauthorized
-  if (response.status === 401) {
-    removeToken();
-    goto('/login');
-    throw new Error('Authentication required');
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+
+    // Parse JSON response
+    const data = await response.json();
+
+    // Return both response and data
+    return { response, data };
+  } catch (error) {
+    console.error(`API request error for ${endpoint}:`, error);
+    throw error;
   }
+}
 
-  const data = await response.json();
+// Authentication API functions
+export const authApi = {
+  login: async (username: string, password: string) => {
+    return apiRequest('/tokens/authentication', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+  },
 
-  if (!response.ok) {
-    throw new Error(data.message || 'API request failed');
+  register: async (userData: any) => {
+    return apiRequest('/users', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
   }
+};
 
-  return data as T;
-}  
+// Workout API functions
+export const workoutApi = {
+  getAll: async () => {
+    return apiRequest('/workouts');
+  },
+
+  getById: async (id: number) => {
+    return apiRequest('/workouts/${id}');
+  },
+
+  create: async (workout: any) => {
+    return apiRequest('/workouts', {
+      method: 'POST',
+      body: JSON.stringify(workout)
+    });
+  },
+
+
+  update: async (id: number, workout:any) => {
+    return apiRequest('/workouts/${id}', {
+      method: 'PUT',
+      body: JSON.stringify(workout)
+    });
+  },
+
+  delete: async (id: number) => {
+    return apiRequest('/wokrouts/${id}', {
+      method: 'DELETE'
+    });
+  }
+};
+
+// Workout entries API functions
+export const workoutEntriesApi = {
+  getByWorkoutId: async (workoutId: number) => {
+    return apiRequest(`/workouts/${workoutId}/entries`);
+  },
+
+  create: async (workoutId: number, entry: any) => {
+    return apiRequest(`/workouts/${workoutId}/entries`, {
+      method: 'POST',
+      body: JSON.stringify(entry)
+    });
+  }
+};

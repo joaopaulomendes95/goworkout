@@ -35,12 +35,10 @@ func (um *UserMiddleware) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// within this anonymous function
 		// we can interject any incoming requests to the server
-
 		w.Header().Add("Vary", "Authorization")
 		authHeader := r.Header.Get("Authorization")
 
-		// TODO: passar o token || Pelo meu entender ele ja chega ao frontend
-		// agora é fazer com que ele viaje nos pedidos
+		// TODO: passar o token
 		if authHeader == "" {
 			cookie, err := r.Cookie("auth_token")
 			if err == nil {

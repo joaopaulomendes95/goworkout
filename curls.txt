@@ -1,0 +1,56 @@
+curl -X POST "http://localhost:8080/users" \
+     -H "Content-Type: application/json" \
+     -d '{
+          "username": "joao",
+          "email": "joao@mail.com",
+          "password": "SecureP@ssword123",
+          "bio": "Physical activity noob"
+        }'
+
+curl -X POST "http://localhost:8080/tokens/authentication" \
+     -H "Content-Type: application/json" \
+     -d '{
+          "username": "joao",
+          "password": "SecureP@ssword123"
+        }'
+
+curl -X POST "http://localhost:8080/workouts" \
+     -H "Authorization: Bearer 3VGSV7LBT4IVASURIKUOUWOF5WGHOWRXUZA6OLKK7U4ABNCLPVSA" \
+     -H "Content-Type: application/json" \
+     -d '{
+          "title": "Morning Cardio",
+          "description": "A light 30-minute jog to start the day.",
+          "duration_minutes": 30,
+          "calories_burned": 300,
+          "entries": [
+              {
+                  "exercise_name": "Jogging",
+                  "sets": 1,
+                  "duration_seconds": 1800,
+                  "weight": 0,
+                  "notes": "Maintain a steady pace",
+                  "order_index": 1
+              }
+          ]
+        }'
+
+
+curl -X PUT "http://localhost:8080/workouts/{id}" \
+     -H "Authorization: Bearer M6BOKTWSQJL74GJJO5OIOMOG3V63MYRIKLUBZ6ILEUQUPCN7472Q" \
+     -H "Content-Type: application/json" \
+     -d '{
+          "title": "Updated Cardio",
+          "description": "A relaxed 45-minute walk after dinner.",
+          "duration_minutes": 45,
+          "calories_burned": 250,
+          "entries": [
+              {
+                  "exercise_name": "Walking",
+                  "sets": 1,
+                  "duration_seconds": 2700,
+                  "weight": 0,
+                  "notes": "Keep a steady pace",
+                  "order_index": 1
+              }
+          ]
+        }'

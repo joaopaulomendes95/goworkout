@@ -6,10 +6,10 @@
   let { children } = $props();
 </script>
 
-<div class="min-h-screen bg-gray-900 text-white">
+  <div class="min-h-screen bg-gray-900 text-white">
   <header class="bg-gray-800 shadow-md">
     <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <a href="/" class="text-xl font-bold text-blue-400 hover:text-blue-300">GoWorkout</a>
+      <a href="/" class="text-xl font-bold text-blue-400 hover:text-blue-300">Go Workout</a>
       <div>
         {#if $page.data.authenticated}
           <a href="/workouts" class="px-3 py-2 hover:text-blue-300">Workouts</a>

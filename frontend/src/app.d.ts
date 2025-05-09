@@ -11,12 +11,16 @@ declare global {
             user?: BackendUser; // Use imported type
         }
         interface PageData {
-            user?: BackendUser; // Use imported type
+            authenticated: boolean;
+            user?: BackendUser;
             authenticated?: boolean;
             workouts?: BackendWorkout[]; // Use imported type
+            workout?: BackendWorkout; // Use imported type
             error?: { message: string };
+            [key: string]: any; // Allow any other properties
         }
         // interface Error {}
         // interface Platform {}
     }
 }
+export {};

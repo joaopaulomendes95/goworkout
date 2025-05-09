@@ -1,43 +1,58 @@
 import { redirect, fail, isRedirect } from '@sveltejs/kit';
-import type { Actions, PageServerLoadEvent } from './$types';
+import type { Actions, PageServerLoad } from './$types'; // Added PageServerLoad
+
+const GO_API_URL = process.env.PRIVATE_GO_API_URL || 'http://app:8080';
+
+// Optional: If you want to redirect logged-in users away from register page
+export const load: PageServerLoad = async ({ locals }) => {
+	if (locals.authenticated) {
+		throw redirect(303, '/workouts');
+	}
+	return {};
+};
 
 export const actions: Actions = {
-  user_register: async (event: PageServerLoadEvent) => {
-    const { request, fetch: eventFetch } = event;
-    const data = await request.formData();
-    const username = data.get('username')?.toString() || '';
-    const email = data.get('email')?.toString() || '';
-    const password = data.get('password')?.toString() || '';
-    const bio = data.get('bio')?.toString() || '';
+	user_register: async ({ request, fetch: svelteKitFetch }) => {
+		const data = await request.formData();
+		const username = data.get('username')?.toString() || '';
+		const email = data.get('email')?.toString() || '';
+		const password = data.get('password')?.toString() || '';
+		const bio = data.get('bio')?.toString() || ''; // Bio is optional
 
-    if (!username || !email || !password) {
-      return fail(400, { username, email, bio, message: 'Username, email, and password are required.' });
-    }
+		const formValues = { username, email, bio }; // For repopulating form
 
-    try {
-      const response = await eventFetch(`/api/users`, { // Relative path
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password, bio })
-      });
+		if (!username || !email || !password) {
+			return fail(400, { ...formValues, message: 'Username, email, and password are required.' });
+		}
+		if (password.length < 8) { // Example additional validation
+            return fail(400, { ...formValues, message: 'Password must be at least 8 characters long.' });
+        }
 
-      if (response.ok) {
-        throw redirect(303, '/login?registered=true');
-      } else {
-        const result = await response.json().catch(() => ({ error: 'Registration failed and could not parse error.' }));
-        return fail(response.status || 400, {
-          username, email, bio,
-          message: result.error || result.message || 'Registration failed. Please try again.'
-        });
-      }
-    } catch (error: any) {
-      if (isRedirect(error)) {
-        throw error;
-      }
-      console.error("Register action unexpected error: ", error);
-      return fail(500, {
-        username, email, bio, message: 'An unexpected error occurred.'
-      });
-    }
-  }
+
+		try {
+			const response = await svelteKitFetch(`${GO_API_URL}/users`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, email, password, bio })
+			});
+
+			if (response.ok) { // Backend returns 201 Created on success
+				throw redirect(303, '/login?registered=true');
+			} else {
+				const result = await response.json().catch(() => ({ error: 'Registration failed and could not parse error response.' }));
+				return fail(response.status || 400, {
+					...formValues,
+					message: result.error || result.message || 'Registration failed. Please try again.'
+				});
+			}
+		} catch (error: any) {
+			if (isRedirect(error)) {
+				throw error;
+			}
+			console.error("Register action unexpected error: ", error);
+			return fail(500, {
+				...formValues, message: 'An unexpected error occurred during registration.'
+			});
+		}
+	}
 };

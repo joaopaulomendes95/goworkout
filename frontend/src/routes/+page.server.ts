@@ -1,25 +1,27 @@
 import { error } from '@sveltejs/kit';
-import type { PageServerLoad, PageServerLoadEvent } from './$types';
 
-export const load: PageServerLoad = async (event: PageServerLoadEvent) => { // Add event type
-    async function getHealth() {
-        try {
-            // Use event.fetch for server-side requests in load functions
-            const healthResponse = await event.fetch(`/api/health`); // Relative path
-            if (!healthResponse.ok) {
-                throw new Error(`Failed to fetch health: ${healthResponse.status}`);
-            }
-            return healthResponse.json();
-        } catch (e: any) {
-            console.error('Error fetching health in /+page.server.ts:', e.message);
-            // SvelteKit's error helper creates a proper error page
-            error(500, `Failed to fetch health: ${e.message}`);
-        }
-    }
+// Use an environment variable for the backend URL accessible from SvelteKit server
+// Ensure this is set in your .env file (e.g., .env in frontend dir or project root)
+const GO_API_URL = process.env.PRIVATE_GO_API_URL || 'http://app:8080';
 
-    const health = await getHealth();
+export async function load({ fetch: svelteKitFetch }) {
+	async function getHealth() {
+		try {
+			const healthResponse = await svelteKitFetch(`${GO_API_URL}/health`); // Use SvelteKit's fetch
+			if (!healthResponse.ok) {
+				console.error('Health check failed:', healthResponse.status, await healthResponse.text());
+				// Return an error structure that the page can display
+				return { status: 'down', error: `Backend health check failed with status ${healthResponse.status}` };
+			}
+			return await healthResponse.json();
+		} catch (e: any) {
+			console.error('Error fetching health:', e.message || e);
+			return { status: 'down', error: 'Network error or backend unavailable for health check.' };
+		}
+	}
 
-    return {
-        health
-    }
-};
+	const healthData = await getHealth();
+	return {
+		health: healthData // This will include status and potentially an error message
+	};
+}

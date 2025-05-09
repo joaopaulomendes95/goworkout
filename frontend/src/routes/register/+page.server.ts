@@ -1,12 +1,12 @@
-// frontend/src/routes/register/+page.server.ts
 import { redirect, fail, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
-const GO_API_URL = 'http://app:8080'; // Adjust if different
+// Adjust to match GO backend URL
+const GO_API_URL = 'http://app:8080';
 
 export const actions: Actions = {
   // Renamed from user_register to default for simpler form action
-  default: async ({ request, fetch }) => { 
+  user_register: async ({ request, fetch }) => { 
     const data = await request.formData();
     const username = data.get('username')?.toString() || '';
     const email = data.get('email')?.toString() || '';

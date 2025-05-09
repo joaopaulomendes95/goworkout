@@ -90,13 +90,9 @@
           <div class="p-4 bg-gray-700 rounded-md shadow-sm">
             <h3 class="text-xl font-semibold text-blue-400">{workout.title}</h3>
             <p class="text-sm text-gray-300 mt-1">{workout.description}</p>
-            <div class="text-xs text-gray-400 mt-2">
-              <span>Duration: {workout.duration_minutes} mins</span> |
-              <span>Calories: {workout.calories_burned}</span>
-            </div>
             {#if workout.entries && workout.entries.length > 0}
               <div class="mt-3 pl-4 border-l-2 border-gray-600">
-                <h4 class="text-sm font-medium text-gray-200 mb-1">Exercises:</h4>
+                <h4 class="text-sm font-medium text-gray-200 mb-1">Entries:</h4>
                 <ul class="list-disc list-inside space-y-1 text-xs">
                   {#each workout.entries as entry (entry.id)}
                     <li>

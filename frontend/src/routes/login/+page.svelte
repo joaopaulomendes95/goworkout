@@ -35,7 +35,7 @@
       </div>
     {/if}
 
-    <form method="POST" action="?/login" use:enhance class="space-y-6">
+    <form method="POST" action="?/user_login" use:enhance class="space-y-6">
         <div>
             <label for="username" class={labelClasses}>Username</label>
             <input

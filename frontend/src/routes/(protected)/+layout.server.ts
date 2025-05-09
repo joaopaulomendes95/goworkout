@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals, url, parent }) => {
+export const load: LayoutServerLoad = async ({ url, parent }: { url: URL; parent: () => Promise<{ authenticated: boolean; user: any }> }) => {
   const parentData = await parent(); // Gets { authenticated, user } from root layout
 
   if (!parentData.authenticated) {

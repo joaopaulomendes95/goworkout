@@ -39,7 +39,7 @@
 		</div>
 	{/if}
 
-	<form method="POST" use:enhance class="space-y-6">
+	<form method="POST" action="?/user_register" class="space-y-6">
 		<div class="space-y-2">
 			<label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
 				>Username</label

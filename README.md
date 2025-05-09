@@ -1,6 +1,6 @@
 # goworkout
 
-This project is a basic web applicationi to track workouts.
+This project is a basic web application to track workouts.
 Its a study subject to get familiar with GO, and frontend in general.
 
 Special thanks to:

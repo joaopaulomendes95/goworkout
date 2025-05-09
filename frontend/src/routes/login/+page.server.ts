@@ -4,7 +4,7 @@ import type { Actions } from './$types';
 const GO_API_URL = 'http://app:8080'; // Adjust if different
 
 export const actions: Actions = {
-  login: async ({ request, cookies, fetch, locals, url: pageUrl }) => {
+  user_login: async ({ request, cookies, fetch, locals, url: pageUrl }) => {
     const data = await request.formData();
     const username = data.get('username')?.toString() || '';
     const password = data.get('password')?.toString() || '';

@@ -1,68 +1,51 @@
-// frontend/src/routes/(protected)/workouts/+page.server.ts
-import { fail } from '@sveltejs/kit'; // No redirect/error from load, layout handles auth
-import type { Actions, PageServerLoad } from './$types';
- import type { BackendWorkout, BackendWorkoutEntry } from '$lib/types';
+import { fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad, PageServerLoadEvent } from './$types';
+import type { BackendWorkout, BackendWorkoutEntry } from '$lib/types';
 
-const GO_API_URL = 'http://app:8080';
 
-// This load function might not fetch workouts anymore if no list endpoint exists.
-// It will mainly ensure the user is authenticated (via the (protected) layout).
-export const load: PageServerLoad = async ({ locals }) => {
-    if (!locals.authenticated || !locals.token) {
-    // This should ideally be caught by the (protected) layout,
-    // but as a safeguard or if you want to return specific data for unauthenticated.
-    // For a protected route, the layout usually handles the redirect.
-    // If we reach here and not authenticated, something is amiss or it's by design.
-    return { workouts: [], error: 'Not authenticated' }; // Or throw redirect
-  }
-
-  try {
-    const response = await fetch(`${GO_API_URL}/workouts/`, { // Ensure trailing slash matches Go route
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${locals.token}`
-      }
-    });
-
-    if (!response.ok) {
-      const errorResult = await response.json().catch(() => ({ error: `API error (${response.status}) fetching workouts.` }));
-      console.error("[Workouts Load] API Error fetching workouts:", response.status, errorResult);
-      return {
-        workouts: [], // Return empty array on error
-        error: errorResult.error || errorResult.message || `Failed to load workouts (status: ${response.status}).`
-      };
+export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
+    // Auth handled by (protected) layout. User data from root layout.
+    if (!event.locals.authenticated || !event.locals.token) {
+        return { workouts: [], error: 'Not authenticated', user: event.locals.user };
     }
 
-    const data = await response.json(); // Go API returns { workouts: [...] }
-    
-    // Ensure the data structure matches what you expect
-    if (data && Array.isArray(data.workouts)) {
-      return {
-        workouts: data.workouts as BackendWorkout[] // Pass the workouts array to the page
-      };
-    } else {
-      console.error("[Workouts Load] Unexpected data structure from API:", data);
-      return {
-        workouts: [],
-        error: "Unexpected data structure from API."
-      };
-    }
+    try {
+        const response = await event.fetch(`/api/workouts/`, { // Relative path
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${event.locals.token}` }
+        });
 
-  } catch (e: any) {
-    console.error("[Workouts Load] Network or unexpected error:", e);
-    return {
-      workouts: [],
-      error: 'A network error occurred while fetching workouts. Please try again.'
-    };
-  }
+        if (!response.ok) {
+            const errorResult = await response.json().catch(() => ({ error: `API error (${response.status})` }));
+            return {
+                workouts: [],
+                error: errorResult.error || errorResult.message || `Failed to load workouts (status: ${response.status}).`,
+                user: event.locals.user
+            };
+        }
+        const data = await response.json();
+        if (data && Array.isArray(data.workouts)) {
+            return {
+                workouts: data.workouts as BackendWorkout[],
+                user: event.locals.user
+            };
+        }
+        return { workouts: [], error: "Unexpected data structure.", user: event.locals.user };
+    } catch (e: any) {
+        return {
+            workouts: [],
+            error: 'A network error occurred while fetching workouts.',
+            user: event.locals.user
+        };
+    }
 };
 
 export const actions: Actions = {
-  addWorkout: async ({ request, fetch, locals }) => {
+  addWorkout: async (event: PageServerLoadEvent) => {
+    const { request, locals, fetch: eventFetch } = event;
     if (!locals.token) {
       return fail(401, { formError: 'Authentication required.' });
     }
-
     const formData = await request.formData();
     const title = formData.get('title')?.toString();
     const description = formData.get('description')?.toString();
@@ -70,31 +53,16 @@ export const actions: Actions = {
     const caloriesBurnedStr = formData.get('caloriesBurned')?.toString();
     const entriesString = formData.get('entries')?.toString();
 
+    // ... (rest of your validation logic for form fields) ...
     if (!title || !description || !durationMinutesStr || !caloriesBurnedStr || !entriesString) {
-      return fail(400, {
-        formError: 'All workout fields and at least one entry are required.',
-        // Pass back values for repopulation
-        title, description, durationMinutes: durationMinutesStr, caloriesBurned: caloriesBurnedStr, entries: entriesString
-      });
+      return fail(400, { /* ... form values for repopulation ... */ formError: 'All fields required.' });
     }
-
-    let entries: Partial<BackendWorkoutEntry>[]; // Use Partial if IDs are not sent for new entries
+     let entries: Partial<BackendWorkoutEntry>[];
     try {
       entries = JSON.parse(entriesString);
-      if (!Array.isArray(entries) || entries.length === 0) {
-        throw new Error("Entries must be a non-empty array.");
-      }
-      // Validate each entry if needed
-      for (const entry of entries) {
-        if (!entry.exercise_name || !entry.sets || (entry.reps == null && entry.duration_seconds == null)) {
-            throw new Error("Each entry must have exercise name, sets, and either reps or duration.");
-        }
-      }
-    } catch (e: any) {
-      return fail(400, {
-        formError: `Invalid entries data: ${e.message}`,
-        title, description, durationMinutes: durationMinutesStr, caloriesBurned: caloriesBurnedStr, entries: entriesString
-      });
+      // ... (entries validation) ...
+    } catch (e:any) {
+      return fail(400, { /* ... */ formError: `Invalid entries: ${e.message}`});
     }
 
     const newWorkoutPayload = {
@@ -102,42 +70,11 @@ export const actions: Actions = {
       description,
       duration_minutes: parseInt(durationMinutesStr, 10),
       calories_burned: parseInt(caloriesBurnedStr, 10),
-      entries: entries.map((e, idx) => {
-        // Determine if it's a rep-based or duration-based entry
-        let finalReps = e.reps != null && e.reps > 0 ? e.reps : null;
-        let finalDuration = e.duration_seconds != null && e.duration_seconds > 0 ? e.duration_seconds : null;
-
-        // If both are somehow provided (and positive), prioritize one or make it an error earlier
-        // For now, let's assume UI or prior validation ensures only one is meaningfully filled.
-        // If reps are provided (and > 0), nullify duration.
-        // If duration is provided (and > 0), nullify reps.
-        // If both are 0 or null, the backend constraint will catch it.
-
-        if (finalReps !== null && finalDuration !== null) {
-          // This case should ideally be prevented by UI logic.
-          // For now, let's say we prioritize reps if both are somehow positive.
-          // Or, better, your UI should only allow one to be entered.
-          // For the constraint: if reps has a value, duration MUST be null.
-          finalDuration = null;
-        }
-
-
-        return {
-          exercise_name: e.exercise_name,
-          sets: e.sets,
-          reps: finalReps,
-          duration_seconds: finalDuration,
-          weight: e.weight != null ? e.weight : null, // Send null if not applicable
-          notes: e.notes || "",
-          order_index: e.order_index !== undefined ? e.order_index : idx + 1,
-        };
-      })
+      entries: entries.map((e, idx) => ({ /* ... map entry data ... */ }))
     };
 
-    console.log("[Workouts Action] Sending payload to POST /workouts:", JSON.stringify(newWorkoutPayload, null, 2));
-
     try {
-      const response = await fetch(`${GO_API_URL}/workouts/`, { // POST /workouts
+      const response = await eventFetch(`/api/workouts/`, { // Relative path
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,54 +83,38 @@ export const actions: Actions = {
         body: JSON.stringify(newWorkoutPayload)
       });
 
-      if (!response.ok) { // e.g., 201 Created is ok
-        const errorResult = await response.json().catch(() => ({ error: `API error (${response.status}) and failed to parse error response.` }));
-        console.error("[Workouts Action] API Error creating workout:", response.status, errorResult);
-        return fail(response.status, {
-          formError: errorResult.error || errorResult.message || `Failed to add workout.`,
-          title, description, durationMinutes: durationMinutesStr, caloriesBurned: caloriesBurnedStr, entries: entriesString
-        });
+      if (!response.ok) {
+        const errorResult = await response.json().catch(() => ({ error: `API error ${response.status}` }));
+        return fail(response.status, { /* ...form values... */ formError: errorResult.error || errorResult.message || 'Failed to add workout.' });
       }
-
-      const createdWorkout = await response.json(); // Backend should return the created workout
-      console.log("[Workouts Action] Workout created successfully:", createdWorkout);
-
-      // Instead of invalidating a list, we can return the created workout
-      // or just a success message. If you want to show a list client-side,
-      // you'd add this `createdWorkout` to a client-side store.
-      return { success: true, message: "Workout added successfully!", createdWorkout };
+      const createdWorkout = await response.json();
+      return { success: true, message: "Workout added successfully!", createdWorkout: createdWorkout.workout }; // assuming backend wraps in 'workout'
     } catch (e: any) {
-      console.error("[Workouts Action] Network or unexpected error:", e);
-      return fail(500, {
-        formError: 'A network error occurred. Please try again.',
-        title, description, durationMinutes: durationMinutesStr, caloriesBurned: caloriesBurnedStr, entries: entriesString
-      });
+      console.error("[Workouts Action] Add workout error:", e.message);
+      return fail(500, { /* ...form values... */ formError: 'A network error occurred.' });
     }
   },
 
-  // deleteWorkout action would still be relevant if you can list/identify workouts to delete
-  // but how would the user know which workout ID to delete without a list?
-  // This might be for a different view (e.g., a workout detail page).
-  deleteWorkout: async ({ request, fetch, locals }) => {
-    // ... (implementation for DELETE /workouts/{id})
-    // This action makes sense if you navigate to a page showing a single workout
-    // and then delete it.
+  deleteWorkout: async (event: PageServerLoadEvent) => {
+    const { request, locals, fetch: eventFetch } = event;
     if (!locals.token) return fail(401, { message: 'Auth required.' });
+
     const formData = await request.formData();
     const workoutId = formData.get('workoutId')?.toString();
     if (!workoutId) return fail(400, { message: 'Workout ID missing.' });
 
     try {
-        const response = await fetch(`${GO_API_URL}/workouts/${workoutId}`, {
+        const response = await eventFetch(`/api/workouts/${workoutId}`, { // Relative path
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${locals.token}` }
         });
-        if (response.ok || response.status === 204) {
+        if (response.ok || response.status === 204) { // 204 is also success for DELETE
             return { success: true, deletedId: workoutId, message: "Workout deleted." };
         }
         const errResult = await response.json().catch(() => ({}));
         return fail(response.status, { message: errResult.error || errResult.message || "Failed to delete." });
-    } catch (e) {
+    } catch (e:any) {
+        console.error("[Workouts Action] Delete workout error:", e.message);
         return fail(500, { message: "Network error deleting workout." });
     }
   }

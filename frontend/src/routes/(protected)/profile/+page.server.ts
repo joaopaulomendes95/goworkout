@@ -1,53 +1,54 @@
-import { fail } from '@sveltejs/kit'; 
-import type { Actions, PageServerLoad } from './$types';
-import type { BackendWorkout, BackendWorkoutEntry } from '$lib/types';
+import type { PageServerLoad, PageServerLoadEvent } from './$types';
+import type { BackendWorkout } from '$lib/types';
 
-const GO_API_URL = 'http://app:8080';
+export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
+    // Authentication is handled by the (protected)/+layout.server.ts
+    // User data is available from the root +layout.server.ts via await event.parent() or in $page.data
+    // We only need to fetch profile-specific data here, like workouts for this example.
 
-
-export const load: PageServerLoad = async ({ locals }) => {
-    if (!locals.authenticated || !locals.token) {
-    return { workouts: [], error: 'Not authenticated' }; // Or throw redirect
-  }
-
-  try {
-    const response = await fetch(`${GO_API_URL}/workouts/`, { // Ensure trailing slash matches Go route
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${locals.token}`
-      }
-    });
-
-    if (!response.ok) {
-      const errorResult = await response.json().catch(() => ({ error: `API error (${response.status}) fetching workouts.` }));
-      console.error("[Workouts Load] API Error fetching workouts:", response.status, errorResult);
-      return {
-        workouts: [], // Return empty array on error
-        error: errorResult.error || errorResult.message || `Failed to load workouts (status: ${response.status}).`
-      };
+    if (!event.locals.authenticated || !event.locals.token) {
+        // This should be caught by (protected) layout, but good for robustness
+        return { workouts: [], error: 'Not authenticated', user: event.locals.user };
     }
 
-    // Go API returns { workouts: [...] }
-    const data = await response.json(); 
-    
-    // Ensure the data structure matches what you expect
-    if (data && Array.isArray(data.workouts)) {
-      return {
-        workouts: data.workouts as BackendWorkout[] // Pass the workouts array to the page
-      };
-    } else {
-      console.error("[Workouts Load] Unexpected data structure from API:", data);
-      return {
-        workouts: [],
-        error: "Unexpected data structure from API."
-      };
-    }
+    try {
+        const response = await event.fetch(`/api/workouts/`, { // Relative path
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${event.locals.token}` // Explicitly sending token
+            }
+        });
 
-  } catch (e: any) {
-    console.error("[Workouts Load] Network or unexpected error:", e);
-    return {
-      workouts: [],
-      error: 'A network error occurred while fetching workouts. Please try again.'
-    };
-  }
+        if (!response.ok) {
+            const errorResult = await response.json().catch(() => ({ error: `API error (${response.status}) fetching workouts.` }));
+            console.error("[Profile Load] API Error fetching workouts:", response.status, errorResult);
+            return {
+                workouts: [],
+                error: errorResult.error || errorResult.message || `Failed to load workouts (status: ${response.status}).`,
+                user: event.locals.user // Pass user from locals
+            };
+        }
+
+        const data = await response.json();
+        if (data && Array.isArray(data.workouts)) {
+            return {
+                workouts: data.workouts as BackendWorkout[],
+                user: event.locals.user // Pass user from locals
+            };
+        } else {
+            console.error("[Profile Load] Unexpected data structure from API:", data);
+            return {
+                workouts: [],
+                error: "Unexpected data structure from API.",
+                user: event.locals.user
+            };
+        }
+    } catch (e: any) {
+        console.error("[Profile Load] Network or unexpected error:", e.message);
+        return {
+            workouts: [],
+            error: 'A network error occurred while fetching workouts.',
+            user: event.locals.user
+        };
+    }
 };

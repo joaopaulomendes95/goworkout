@@ -1,31 +1,25 @@
-const API = 'http://app:8080'; // Changed from 'http://localhost:8080'
 import { error } from '@sveltejs/kit';
+import type { PageServerLoad, PageServerLoadEvent } from './$types';
 
-export async function load({ }) {
+export const load: PageServerLoad = async (event: PageServerLoadEvent) => { // Add event type
     async function getHealth() {
         try {
-            const health = await fetch(`${API}/health`);
-            return health.json();
-        } catch (e) {
-            console.error('Error fetching health', e);
-            error(400, 'Failed to fetch health');
+            // Use event.fetch for server-side requests in load functions
+            const healthResponse = await event.fetch(`/api/health`); // Relative path
+            if (!healthResponse.ok) {
+                throw new Error(`Failed to fetch health: ${healthResponse.status}`);
+            }
+            return healthResponse.json();
+        } catch (e: any) {
+            console.error('Error fetching health in /+page.server.ts:', e.message);
+            // SvelteKit's error helper creates a proper error page
+            error(500, `Failed to fetch health: ${e.message}`);
         }
     }
 
     const health = await getHealth();
 
-    console.log('health', health);
-
-    // const { user } = locals;
-    // if (!user) {
-    // 	return {
-    // 		status: 302,
-    // 		redirect: '/login',
-    // 		message: 'You must be logged in to view this page'
-    // 	};
-    // }
     return {
-        // user,
         health
-    };
-}
+    }
+};

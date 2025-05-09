@@ -2,67 +2,83 @@
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageData } from './$types';
 	import type { BackendWorkoutEntry } from '$lib/types';
+    import { browser } from '$app/environment'; // For potential browser-only logic if needed
 
 	const { data, form } = $props<{ data: PageData; form?: ActionData }>();
 
-	// Initialize $state with potentially undefined values first
-	let workoutTitle = $state<string>('');
-	let workoutDescription = $state<string>('');
-	let workoutDuration = $state<number>(0);
-	let workoutCalories = $state<number>(0);
+	// These $state variables are for the form inputs
+	let workoutTitle = $state('');
+	let workoutDescription = $state('');
+	let workoutDuration = $state(0);
+	let workoutCalories = $state(0);
 	let workoutEntries = $state<Partial<BackendWorkoutEntry>[]>([]);
 	
 	let actionFeedback = $state<{ type: 'error'; message: string } | undefined>(undefined);
+    let isInitialized = $state(false); // Flag to ensure initial setup from props happens once
 
-	// This effect will run when `data.workout` or `form` changes.
-	// It correctly prioritizes `form` data (e.g., after a failed submission with repopulated values)
-	// over the initial `data.workout` from the load function.
+	// Effect to initialize form fields from `data.workout` on first load,
+    // and then from `form` if a submission fails (to repopulate with user's attempted changes).
 	$effect(() => {
-		const source = form?.title !== undefined ? form : data.workout;
+        const workoutDataFromLoad = data.workout;
+        const formDataFromAction = form;
 
-		if (source) {
-			workoutTitle = source.title || '';
-			workoutDescription = source.description || '';
-			
-			// Ensure numeric conversion if values might come from form as strings
-			const durMinutes = source.durationMinutes ?? source.duration_minutes;
-			workoutDuration = typeof durMinutes === 'string' ? parseInt(durMinutes, 10) || 0 : (durMinutes || 0);
+        console.log('[Edit Page Svelte] Effect for state init/update. Form:', formDataFromAction, 'Data.workout:', workoutDataFromLoad, 'Initialized:', isInitialized);
 
-			const calBurned = source.caloriesBurned ?? source.calories_burned;
-			workoutCalories = typeof calBurned === 'string' ? parseInt(calBurned, 10) || 0 : (calBurned || 0);
-
-			let entriesSource = source.entries;
-			if (typeof entriesSource === 'string') {
-				try { entriesSource = JSON.parse(entriesSource); } catch { entriesSource = []; }
-			}
-			
-			workoutEntries = Array.isArray(entriesSource) ? entriesSource.map((e: any) => ({ ...e })) : [];
-
-			if (workoutEntries.length === 0) {
-				workoutEntries = [{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: 1, weight: null }];
-			}
-		} else if (data.workout === null && !form?.title) {
-            actionFeedback = { type: 'error', message: "Workout data could not be loaded or does not exist." };
-        } else if (data.error && !form?.title) {
-			actionFeedback = { type: 'error', message: typeof data.error === 'string' ? data.error : data.error.message };
-		}
+        if (formDataFromAction && formDataFromAction.formError) {
+            // If form has errors (failed submission), prioritize repopulating from form data
+            console.log('[Edit Page Svelte] Repopulating from failed form submission.');
+            workoutTitle = formDataFromAction.title || '';
+            workoutDescription = formDataFromAction.description || '';
+            workoutDuration = formDataFromAction.durationMinutes ? parseInt(formDataFromAction.durationMinutes) : 0;
+            workoutCalories = formDataFromAction.caloriesBurned ? parseInt(formDataFromAction.caloriesBurned) : 0;
+            if (formDataFromAction.entries && typeof formDataFromAction.entries === 'string') {
+                try { 
+                    const parsedEntries = JSON.parse(formDataFromAction.entries);
+                    workoutEntries = Array.isArray(parsedEntries) && parsedEntries.length > 0 ? parsedEntries : createDefaultEntries();
+                } catch { workoutEntries = createDefaultEntries(); }
+            } else {
+                 workoutEntries = createDefaultEntries();
+            }
+            actionFeedback = { type: 'error', message: formDataFromAction.formError };
+            isInitialized = true; // Mark as initialized even on form error to prevent data.workout override
+        } else if (workoutDataFromLoad && !isInitialized) {
+            // If no form error and not yet initialized, populate from data.workout
+            console.log('[Edit Page Svelte] Initializing from data.workout.');
+            workoutTitle = workoutDataFromLoad.title || '';
+            workoutDescription = workoutDataFromLoad.description || '';
+            workoutDuration = workoutDataFromLoad.duration_minutes || 0;
+            workoutCalories = workoutDataFromLoad.calories_burned || 0;
+            workoutEntries = workoutDataFromLoad.entries?.map(e => ({ ...e })) || createDefaultEntries();
+            if (workoutEntries.length === 0) {
+                workoutEntries = createDefaultEntries();
+            }
+            isInitialized = true;
+        } else if (!workoutDataFromLoad && !formDataFromAction && !isInitialized) {
+            // Case: No workout data from load (e.g. 404 or error) and no form submission yet
+            console.log('[Edit Page Svelte] No workout data from load and no form data.');
+            if (data.error) {
+                 actionFeedback = { type: 'error', message: typeof data.error === 'string' ? data.error : data.error.message };
+            }
+            workoutEntries = createDefaultEntries(); // Ensure entries is an array
+            isInitialized = true; // Mark initialized to prevent re-triggering this path
+        }
 	});
 
-	// Effect for handling form action error messages (from `fail`)
-	$effect(() => {
-        let currentForm = form; // Capture current form prop for this effect run
-		if (currentForm?.formError) { // This is the primary error message from `fail`
-			actionFeedback = { type: 'error', message: currentForm.formError };
-		} else if (currentForm?.message && !currentForm.success) { // General message if `fail` was used with just `message`
-            actionFeedback = { type: 'error', message: currentForm.message };
-        }
-		// Success messages are handled by redirecting from the action in this app.
+    function createDefaultEntries() {
+        return [{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: 1, weight: null }];
+    }
 
+	// Effect for clearing actionFeedback message after a timeout
+	$effect(() => {
 		if (actionFeedback) {
-			const timer = setTimeout(() => { actionFeedback = undefined; }, 4000);
+			const timer = setTimeout(() => { 
+                console.log('[Edit Page Svelte] Clearing actionFeedback.');
+                actionFeedback = undefined; 
+            }, 4000);
 			return () => clearTimeout(timer); // Cleanup function for the effect
 		}
 	});
+
 
 	function addEntryRow() {
 		workoutEntries.push(
@@ -72,7 +88,6 @@
 
 	function removeEntryRow(index: number) {
 		workoutEntries.splice(index, 1);
-		// Re-index after removal
 		workoutEntries.forEach((e, i) => e.order_index = i + 1);
 	}
 
@@ -97,11 +112,8 @@
 <div class="space-y-8 p-4 md:p-6">
 	<h1 class="text-3xl font-bold text-white">Edit Workout</h1>
 
-	{#if (!data.workout && !form?.title) && !actionFeedback}
+	{#if (!data.workout && !form?.title) && !actionFeedback && !isInitialized}
 		<p class="text-yellow-400">Loading workout data...</p>
-		{#if data.error}
-		    <p class="text-red-400">Error: {typeof data.error === 'string' ? data.error : data.error.message}</p>
-		{/if}
 	{/if}
 
 	{#if actionFeedback}
@@ -110,7 +122,7 @@
 		</div>
 	{/if}
 
-	{#if data.workout || form?.title} <!-- Render form if we have initial data or form resubmission data -->
+	{#if (data.workout || form?.title) || (!data.workout && isInitialized) } <!-- Render form if data exists, or if form error, or if initialized after error -->
 		<form method="POST" action="?/updateWorkout" use:enhance class="space-y-4 rounded-lg bg-gray-800 p-6 shadow-md">
 			<div>
 				<label for="title" class={labelClasses}>Title</label>
@@ -133,18 +145,18 @@
 
 			<h3 class="border-t border-gray-700 pt-4 text-xl font-semibold text-white">Entries</h3>
 			<input type="hidden" name="entries" value={JSON.stringify(workoutEntries.map((e, idx) => ({
-				id: e.id, 
+				id: e.id,
 				exercise_name: e.exercise_name,
 				sets: e.sets,
 				reps: e.reps && e.reps > 0 ? e.reps : null,
 				duration_seconds: e.duration_seconds && e.duration_seconds > 0 ? e.duration_seconds : null,
 				weight: e.weight != null && e.weight >= 0 ? e.weight : null,
 				notes: e.notes || '',
-				order_index: idx + 1 
+				order_index: idx + 1
 			})))} />
 			
 			<div class="space-y-3">
-				{#each workoutEntries as entry, index (entry.id || index)} 
+				{#each workoutEntries as entry, index (entry.id || index)}
 					<div class="relative space-y-2 rounded-md border border-gray-700 p-3">
 						<button type="button" onclick={() => removeEntryRow(index)} class="absolute right-1 top-1 {smallButtonClasses} bg-red-700 text-white hover:bg-red-600">×</button>
 						<div>
@@ -185,5 +197,7 @@
 				<a href="/workouts" class="rounded-md bg-gray-600 px-4 py-2 font-medium text-white hover:bg-gray-500">Cancel</a>
 			</div>
 		</form>
-	{/if}
+	{:else if !actionFeedback} <!-- Show loading/error only if not already showing an actionFeedback -->
+        <p class="text-yellow-400">Workout data not available or an error occurred.</p>
+    {/if}
 </div>

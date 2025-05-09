@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageData } from './$types';
 	import type { BackendWorkout, BackendWorkoutEntry } from '$lib/types';
-	import { invalidateAll } from '$app/navigation'; // Removed navigating
+	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
     import { browser } from '$app/environment';
 
@@ -18,26 +18,47 @@
 	let actionFeedback = $state<{ type: 'success' | 'error'; message: string } | undefined>(undefined);
 
 	// Form state for adding a new workout
-	let newWorkoutTitle = $state(form?.title || '');
-	let newWorkoutDescription = $state(form?.description || '');
-	let newWorkoutDuration = $state(form?.durationMinutes ? parseInt(form.durationMinutes) : 0);
-	let newWorkoutCalories = $state(form?.caloriesBurned ? parseInt(form.caloriesBurned) : 0);
-	let newWorkoutEntries = $state<Partial<BackendWorkoutEntry>[]>(
-		form?.entries && typeof form.entries === 'string'
-			? JSON.parse(form.entries)
-			: [{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: 1, weight: null }]
-	);
+	let newWorkoutTitle = $state('');
+	let newWorkoutDescription = $state('');
+	let newWorkoutDuration = $state(0);
+	let newWorkoutCalories = $state(0);
+	let newWorkoutEntries = $state<Partial<BackendWorkoutEntry>[]>([
+		{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: 1, weight: null }
+	]);
 
-    // --- State to track processed form ---
-    let lastProcessedFormTimestamp = $state<number | undefined>(undefined);
-    // --- End State to track processed form ---
+    // --- State to track if the current `form` prop has been processed by the effect ---
+    let formProcessed = $state(false);
+    // ---
 
-	// Effect for handling messages from redirects (e.g., after edit)
+    // Effect to repopulate "Add Workout" form on failure
+    $effect(() => {
+        if (form && form.formError && form.title !== undefined) {
+            console.log('[Workouts Page Svelte] Repopulating Add form from failed submission:', form);
+            newWorkoutTitle = form.title || '';
+            newWorkoutDescription = form.description || '';
+            newWorkoutDuration = form.durationMinutes ? parseInt(form.durationMinutes) : 0;
+            newWorkoutCalories = form.caloriesBurned ? parseInt(form.caloriesBurned) : 0;
+            if (form.entries && typeof form.entries === 'string') {
+                try { 
+                    const parsedEntries = JSON.parse(form.entries);
+                    newWorkoutEntries = Array.isArray(parsedEntries) && parsedEntries.length > 0 
+                        ? parsedEntries 
+                        : [{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: 1, weight: null }];
+                } catch (e) { 
+                    console.error("Error parsing entries from form prop:", e);
+                    newWorkoutEntries = [{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: 1, weight: null }];
+                }
+            }
+        }
+    });
+
+	// Effect for handling messages from redirects (e.g., after successful edit)
 	$effect(() => {
         if (browser) { 
-            const successMessage = $page.url.searchParams.get('message');
-            if (successMessage) {
-                actionFeedback = { type: 'success', message: successMessage.replace(/_/g, ' ') };
+            const messageFromRedirect = $page.url.searchParams.get('message');
+            if (messageFromRedirect) {
+                console.log('[Workouts Page Svelte] Effect: Detected messageFromRedirect:', messageFromRedirect);
+                actionFeedback = { type: 'success', message: messageFromRedirect.replace(/_/g, ' ') };
                 const newUrl = new URL(window.location.href); 
                 newUrl.searchParams.delete('message');
                 window.history.replaceState(window.history.state, '', newUrl); 
@@ -45,67 +66,51 @@
         }
 	});
 	
-	// Effect for handling form action results
+    // This effect runs when `form` prop changes.
+    // We use `formProcessed` to ensure we only act on a new `form` value once.
 	$effect(() => {
-		const currentForm = form; // Capture current form prop for this effect run
+		const currentForm = form; 
+        console.log('[Workouts Page Svelte] Form Processing Effect. Current Form:', currentForm, 'Form Processed Flag:', formProcessed);
 
-        // Only process if 'form' is defined and it's a new submission
-        // (form.timestamp is a hypothetical property SvelteKit might add for this,
-        // but since it doesn't, we use our own lastProcessedFormTimestamp)
-        // A simpler check: if form is present and we haven't processed its specific content yet.
-        // For this, we can check if the form object reference has changed or if its content is new.
-        // However, SvelteKit re-creates the form object. So, we check if it has data.
-		if (!currentForm || (currentForm.timestamp && currentForm.timestamp === lastProcessedFormTimestamp)) {
-            // If form is undefined or we've already processed this specific form instance (hypothetical timestamp)
-            // A more practical check: if form is undefined, or if it's the same actionFeedback message we just set.
-            // This is still tricky. The core idea is to not re-process the *exact same* form result.
-            return;
-        }
-        
-        // If we are here, it's potentially a new form result to process.
-        // Let's assume `form` itself being non-null means it's a new action result.
-        // The problem is if invalidateAll() doesn't lead to `form` becoming undefined before this effect re-runs.
+		if (currentForm && !formProcessed) { // Only process if form exists and not yet processed
+            console.log('[Workouts Page Svelte] Processing new form data:', currentForm);
+            formProcessed = true; // Mark as processed immediately
 
-		if (currentForm.success && currentForm.message) {
-			actionFeedback = { type: 'success', message: currentForm.message };
-			if (currentForm.message?.includes('added successfully')) { 
-                newWorkoutTitle = '';
-                newWorkoutDescription = '';
-                newWorkoutDuration = 0;
-                newWorkoutCalories = 0;
-                newWorkoutEntries = [{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: 1, weight: null }];
+			if (currentForm.success && currentForm.message) {
+				actionFeedback = { type: 'success', message: currentForm.message };
+				if (currentForm.message?.includes('added successfully')) { 
+                    newWorkoutTitle = '';
+                    newWorkoutDescription = '';
+                    newWorkoutDuration = 0;
+                    newWorkoutCalories = 0;
+                    newWorkoutEntries = [{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: 1, weight: null }];
+                }
+				
+				if (browser) { 
+					console.log('[Workouts Page Svelte] Form success: Calling invalidateAll().');
+					invalidateAll(); 
+				}
+
+			} else if (currentForm.formError) {
+				actionFeedback = { type: 'error', message: currentForm.formError };
+				// Repopulation is handled by the other effect now
+			} else if (currentForm.message && !currentForm.success) {
+	            actionFeedback = { type: 'error', message: currentForm.message };
+	        }
+
+            // Timer to clear the feedback message
+            if (actionFeedback) {
+                const timer = setTimeout(() => { 
+                    console.log('[Workouts Page Svelte] Clearing actionFeedback.');
+                    actionFeedback = undefined; 
+                }, 4000);
+                return () => clearTimeout(timer); // Cleanup for this specific effect run
             }
-			
-            // Mark this form instance as processed (using a hypothetical timestamp or a unique ID if available)
-            // Since SvelteKit doesn't provide a unique ID on the form prop for this,
-            // this approach is difficult.
-            // The primary reliance is that `invalidateAll` should lead to `form` being undefined
-            // in the *next* distinct render cycle after data reloads.
-
-			if (browser) { 
-				invalidateAll(); 
-			}
-
-		} else if (currentForm.formError) {
-			actionFeedback = { type: 'error', message: currentForm.formError };
-			newWorkoutTitle = currentForm.title || '';
-			newWorkoutDescription = currentForm.description || '';
-			newWorkoutDuration = currentForm.durationMinutes ? parseInt(currentForm.durationMinutes) : 0;
-			newWorkoutCalories = currentForm.caloriesBurned ? parseInt(currentForm.caloriesBurned) : 0;
-			if (currentForm.entries && typeof currentForm.entries === 'string') {
-				try { newWorkoutEntries = JSON.parse(currentForm.entries); } catch (e) { /* ignore */ }
-			}
-		} else if (currentForm.message && !currentForm.success) {
-            actionFeedback = { type: 'error', message: currentForm.message };
+		} else if (!currentForm && formProcessed) {
+            // If form becomes undefined (e.g., after invalidateAll and reload), reset the flag
+            console.log('[Workouts Page Svelte] Form is now undefined, resetting formProcessed flag.');
+            formProcessed = false;
         }
-
-
-		if (actionFeedback) {
-			const timer = setTimeout(() => { 
-                actionFeedback = undefined; 
-            }, 4000);
-			return () => clearTimeout(timer);
-		}
 	});
 
 
@@ -138,7 +143,7 @@
 	const smallButtonClasses = "text-xs px-2 py-1 rounded";
 </script>
 
-<!-- ... rest of the template remains the same ... -->
+<!-- TEMPLATE REMAINS THE SAME -->
 <div class="space-y-8 p-4 md:p-6">
 	<h1 class="text-3xl font-bold text-white">My Workouts</h1>
 

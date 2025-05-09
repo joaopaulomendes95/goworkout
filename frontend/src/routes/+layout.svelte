@@ -2,8 +2,6 @@
 	import '../app.css';
 	import { page } from '$app/stores';
 
-	// Svelte 5: $props() is implicitly available for top-level component data.
-	// The default slot for children is handled by <slot />.
 </script>
 
 <div class="min-h-screen bg-gray-900 text-white">

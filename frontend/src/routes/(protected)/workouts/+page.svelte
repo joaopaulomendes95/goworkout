@@ -26,9 +26,7 @@
 		{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: 1, weight: null }
 	]);
 
-    // --- State to track if the current `form` prop has been processed by the effect ---
     let formProcessed = $state(false);
-    // ---
 
     // Effect to repopulate "Add Workout" form on failure
     $effect(() => {
@@ -67,7 +65,6 @@
 	});
 	
     // This effect runs when `form` prop changes.
-    // We use `formProcessed` to ensure we only act on a new `form` value once.
 	$effect(() => {
 		const currentForm = form; 
         console.log('[Workouts Page Svelte] Form Processing Effect. Current Form:', currentForm, 'Form Processed Flag:', formProcessed);
@@ -113,7 +110,6 @@
         }
 	});
 
-
 	function addEntryRow() {
 		newWorkoutEntries.push(
 			{ exercise_name: '', sets: 1, reps: null, duration_seconds: null, notes: '', order_index: newWorkoutEntries.length + 1, weight: null }
@@ -143,7 +139,6 @@
 	const smallButtonClasses = "text-xs px-2 py-1 rounded";
 </script>
 
-<!-- TEMPLATE REMAINS THE SAME -->
 <div class="space-y-8 p-4 md:p-6">
 	<h1 class="text-3xl font-bold text-white">My Workouts</h1>
 

@@ -1,4 +1,3 @@
-// frontend/src/routes/(protected)/workouts/+page.server.ts
 import { redirect, error as svelteKitError, type HttpError, isRedirect, fail } from '@sveltejs/kit'; // <<<--- ADDED 'fail' HERE
 import type { Actions, PageServerLoad } from './$types';
 import type { BackendWorkout } from '$lib/types';
@@ -11,14 +10,13 @@ export const load: PageServerLoad = async ({ locals, fetch: svelteKitFetch, cook
 	}
 
 	try {
-		// console.log('[Workouts Load] Fetching from:', `${GO_API_URL}/workouts/`); // Optional: for debugging
+		console.log('[Workouts Load] Fetching from:', `${GO_API_URL}/workouts/`);
 		const response = await svelteKitFetch(`${GO_API_URL}/workouts/`, {
 			headers: {
 				Authorization: `Bearer ${locals.token}`
 			}
 		});
-		// console.log('[Workouts Load] API Response Status:', response.status); // Optional: for debugging
-
+		console.log('[Workouts Load] API Response Status:', response.status);
 		if (response.status === 401 || response.status === 403) {
 			cookies.delete('auth_token', { path: '/' });
 			locals.authenticated = false;
@@ -31,16 +29,16 @@ export const load: PageServerLoad = async ({ locals, fetch: svelteKitFetch, cook
 			try {
 				const errorPayload = await response.json();
 				errorDetail = errorPayload.error || errorPayload.message || errorDetail;
-				// console.error('[Workouts Load] API Error Payload:', errorPayload); // Optional: for debugging
+				console.error('[Workouts Load] API Error Payload:', errorPayload);
 			} catch (jsonParseError) {
-				// console.error('[Workouts Load] Failed to parse error JSON, using status text:', response.statusText); // Optional
+				console.error('[Workouts Load] Failed to parse error JSON, using status text:', response.statusText);
 				errorDetail = response.statusText || errorDetail;
 			}
 			throw svelteKitError(response.status, errorDetail);
 		}
 
 		const responseData = await response.json();
-		// console.log('[Workouts Load] API Response Data:', responseData); // Optional: for debugging
+		console.log('[Workouts Load] API Response Data:', responseData);
 
 		if (responseData && Array.isArray(responseData.workouts)) {
 			return {

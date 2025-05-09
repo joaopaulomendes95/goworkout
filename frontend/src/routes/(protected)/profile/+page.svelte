@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	// import type { BackendUser } from '$lib/types'; // Not strictly needed if user is always undefined here
+	import type { BackendUser } from '$lib/types'; // Not strictly needed if user is always undefined here
 
-	// $page.data.user will be undefined from the root layout in "no backend changes"
-	// const user = $derived($page.data.user as BackendUser | undefined);
 </script>
 
 <div class="space-y-6 p-4 md:p-6">

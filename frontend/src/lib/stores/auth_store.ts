@@ -7,7 +7,7 @@ export const isAuthenticated = Readable<boolean> = derived(
   ($pageStore) => !!$pageStore.data.authenticated
 );
 
-// Client-side logout function 
+// Client-side logout function
 export async function clientLogout() {
   const response = await fetch('/logout', { method: 'POST' });
   if (response.ok && response.redirected) {

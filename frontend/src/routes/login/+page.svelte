@@ -5,7 +5,7 @@
   let { form } = $props();
 
   const justRegistered = $derived($page.url.searchParams.get('registered') === 'true');
-  
+
   // For repopulating form fields on error
   let currentUsername = $state(form?.username || '');
   let currentPassword = $state(''); // Don't repopulate password

@@ -1,7 +1,5 @@
 import { error } from '@sveltejs/kit';
 
-// Use an environment variable for the backend URL accessible from SvelteKit server
-// Ensure this is set in your .env file (e.g., .env in frontend dir or project root)
 const GO_API_URL = process.env.PRIVATE_GO_API_URL || 'http://app:8080';
 
 export async function load({ fetch: svelteKitFetch }) {

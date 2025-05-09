@@ -57,7 +57,7 @@ func (s *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error)
 
 	err = tx.QueryRow(
 		query,
-		workout.ID,
+		workout.UserID,
 		workout.Title,
 		workout.Description,
 		workout.DurationMinutes,
@@ -65,6 +65,9 @@ func (s *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error)
 	).Scan(
 		&workout.ID,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	for i := range workout.Entries {
 		entry := &workout.Entries[i]
@@ -250,7 +253,7 @@ func (pg *PostgresWorkoutStore) GetWorkoutOwner(workoutID int) (int, error) {
 
 func (pg *PostgresWorkoutStore) GetWorkoutsForUser(userID int) ([]Workout, error) {
 	query := `
-    SELECT id, user_id, title, description, duration_minutes, calories_burned, created_at, updated_at 
+    SELECT id, user_id, title, description, duration_minutes, calories_burned
     FROM workouts
     WHERE user_id = $1
     ORDER BY created_at DESC
@@ -276,7 +279,43 @@ func (pg *PostgresWorkoutStore) GetWorkoutsForUser(userID int) ([]Workout, error
 		if err != nil {
 			return nil, err
 		}
+
+		// For each workout, you might want to fetch its entries as well
+		// This makes the response more complete but adds N+1 query potential if not careful
+		// Option 1: Fetch entries here (N+1 potential)
+		entryQuery := `SELECT id, exercise_name, sets, reps, duration_seconds, weight, notes, order_index FROM workout_entries WHERE workout_id = $1 ORDER BY order_index`
+		entryRows, entryErr := pg.db.Query(entryQuery, w.ID)
+		if entryErr != nil {
+			// Log error, decide if you want to return partial data or full error
+			return nil, entryErr
+		}
+		defer entryRows.Close()
+
+		var entries []WorkoutEntry
+		for entryRows.Next() {
+			var entry WorkoutEntry
+			scanErr := entryRows.Scan(
+				&entry.ID,
+				&entry.ExerciseName,
+				&entry.Sets,
+				&entry.Reps,
+				&entry.DurationSeconds,
+				&entry.Weight,
+				&entry.Notes,
+				&entry.OrderIndex,
+			)
+			if scanErr != nil {
+				return nil, scanErr
+			}
+			entries = append(entries, entry)
+		}
+		w.Entries = entries
+		// End Option 1
+
 		workouts = append(workouts, w)
+	}
+	if err = rows.Err(); err != nil { // Check for errors during iteration
+		return nil, err
 	}
 
 	return workouts, nil

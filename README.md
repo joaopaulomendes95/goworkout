@@ -1,6 +1,6 @@
 # goworkout
 
-This project is a basic web applicationi to track workouts.
+This project is a basic web application to track workouts.
 Its a study subject to get familiar with GO, and frontend in general.
 
 Special thanks to:
@@ -8,7 +8,6 @@ Special thanks to:
 - https://github.com/Melkeydev/go-blueprint
 - https://github.com/go-chi/chi
 - https://github.com/air-verse/air
-- https://github.com/a-h/templ
 - https://github.com/tailwindlabs/tailwindcss
 - https://github.com/neovim/neovim
 
@@ -17,15 +16,17 @@ Some way or another, these projects were either used as a reference or inspirati
 ## Technology Stack
 
 - **Backend**: Go with Chi router
-- **Frontend**: HTMX + Tailwind CSS + templ templates
+- **Frontend**: Svelte + Tailwind CSS
 - **Database**: PostgreSQL with Goose migrations
 - **Authentication**: Custom token-based auth
 
 ## Project Structure
 
-- `/cmd` - Application entry points
-  - `/api` - API server
-  - `/web` - Web UI components
+- `/cmd` - Application entry point
+  - `/app` - Application main package
+- `/frontend` - Web client code
+  - `/src` - Frontend source code
+  - `/static` - Static assets
 - `/internal` - Private application code
   - `/api` - REST API handlers
   - `/database` - Database connection management
@@ -36,9 +37,9 @@ Some way or another, these projects were either used as a reference or inspirati
 
 ## Requirements
 
-- Go 1.18 or higher
+- Go 1.24 or higher
 - PostgreSQL 14+
-- Docker (optional, for containerized database)
+- Docker (optional)
 
 ## Features
 

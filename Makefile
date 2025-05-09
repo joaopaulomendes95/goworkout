@@ -1,7 +1,7 @@
 # Build the application
 all: build test
 
-build: tailwind-install
+build:
 	@echo "Building..."
 
 	@go build -o main cmd/app/main.go

@@ -35,16 +35,8 @@ func (um *UserMiddleware) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// within this anonymous function
 		// we can interject any incoming requests to the server
-
 		w.Header().Add("Vary", "Authorization")
 		authHeader := r.Header.Get("Authorization")
-
-		if authHeader == "" {
-			cookie, err := r.Cookie("auth_token")
-			if err == nil {
-				authHeader = "Bearer " + cookie.Value
-			}
-		}
 
 		if authHeader == "" {
 			r = SetUser(r, store.AnonymousUser)
@@ -52,10 +44,9 @@ func (um *UserMiddleware) Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		headerParts := strings.Split(authHeader, " ")
+		headerParts := strings.Split(authHeader, " ") // Bearer <TOKEN>
 		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			r = SetUser(r, store.AnonymousUser)
-			next.ServeHTTP(w, r)
+			utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "invalid authorization header"})
 			return
 		}
 
@@ -73,6 +64,7 @@ func (um *UserMiddleware) Authenticate(next http.Handler) http.Handler {
 
 		r = SetUser(r, user)
 		next.ServeHTTP(w, r)
+		return
 	})
 }
 

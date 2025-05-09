@@ -59,10 +59,12 @@ func (u *User) IsAnonymous() bool {
 	return u == AnonymousUser
 }
 
+// struct for db operations
 type PostgresUserStore struct {
 	db *sql.DB
 }
 
+// constructor function
 func NewPostgresUserStore(db *sql.DB) *PostgresUserStore {
 	return &PostgresUserStore{
 		db: db,
@@ -77,6 +79,7 @@ type UserStore interface {
 	GetUserToken(scope, tokenPlainText string) (*User, error)
 }
 
+// Create a new user
 func (s *PostgresUserStore) CreateUser(user *User) error {
 	query := `
 	INSERT INTO users (username, email, password_hash, bio)
@@ -102,6 +105,7 @@ func (s *PostgresUserStore) CreateUser(user *User) error {
 	return nil
 }
 
+// get user given a username
 func (s *PostgresUserStore) GetUserByUsername(username string) (*User, error) {
 	user := &User{
 		PasswordHash: password{},
@@ -135,6 +139,7 @@ func (s *PostgresUserStore) GetUserByUsername(username string) (*User, error) {
 	return user, nil
 }
 
+// update a user
 func (s *PostgresUserStore) UpdateUser(user *User) error {
 	query := `
 	UPDATE users
@@ -165,6 +170,7 @@ func (s *PostgresUserStore) UpdateUser(user *User) error {
 	return nil
 }
 
+// gets the user token
 func (s *PostgresUserStore) GetUserToken(scope, plainTextPassword string) (*User, error) {
 	tokenHash := sha256.Sum256([]byte(plainTextPassword))
 

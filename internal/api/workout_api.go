@@ -24,6 +24,36 @@ func NewWorkoutAPI(workoutStore store.WorkoutStore, logger *log.Logger) *Workout
 	}
 }
 
+func (wh *WorkoutAPI) HandleGetUserWorkouts(w http.ResponseWriter, r *http.Request) {
+	currentUser := middleware.GetUser(r) // Middleware should have set this
+	if currentUser == nil || currentUser.IsAnonymous() {
+		// This should ideally be caught by RequireUser middleware already,
+		// but good for a sanity check.
+		wh.logger.Println("WARN: [WorkoutAPI.HandleGetUserWorkouts] Attempt to get workouts without authenticated user.")
+		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "Authentication required"})
+		return
+	}
+
+	wh.logger.Printf("INFO: [WorkoutAPI.HandleGetUserWorkouts] Fetching workouts for user ID: %d", currentUser.ID)
+
+	workouts, err := wh.workoutStore.GetWorkoutsForUser(currentUser.ID)
+	if err != nil {
+		wh.logger.Printf("ERROR: [WorkoutAPI.HandleGetUserWorkouts] Failed to get workouts for user ID %d: %v", currentUser.ID, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, utils.Envelope{"error": "Failed to retrieve workouts"})
+		return
+	}
+
+	if workouts == nil { // Handle case where GetWorkoutsForUser might return nil slice for no workouts
+		workouts = []store.Workout{} // Return empty array instead of null for JSON
+	}
+
+	wh.logger.Printf("INFO: [WorkoutAPI.HandleGetUserWorkouts] Successfully fetched %d workouts for user ID: %d", len(workouts), currentUser.ID)
+	// Your SvelteKit frontend expects an array directly, or an object with a "workouts" key.
+	// Let's assume it expects an object like {"workouts": [...]} based on your SvelteKit load function.
+	// If it expects a direct array, change WriteJSON to: utils.WriteJSON(w, http.StatusOK, workouts)
+	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"workouts": workouts})
+}
+
 func (wh *WorkoutAPI) HandleGetWorkoutByID(w http.ResponseWriter, r *http.Request) {
 	workoutID, err := utils.ReadIDParam(r)
 	if err != nil {

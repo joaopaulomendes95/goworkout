@@ -4,7 +4,7 @@ import type { BackendWorkout, BackendWorkoutEntry } from '$lib/types';
 
 const GO_API_URL = process.env.PRIVATE_GO_API_URL || 'http://app:8080';
 
-export const load: PageServerLoad = async ({ locals, fetch: svelteKitFetch, params, cookies, url }) => {
+export const load: PageServerLoad = async ({ locals, fetch, params, cookies, url }) => {
 	if (!locals.authenticated || !locals.token) {
 		throw redirect(303, `/login?redirectTo=${encodeURIComponent(url.pathname + url.search)}`);
 	}
@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ locals, fetch: svelteKitFetch, para
 	}
 
 	try {
-		const response = await svelteKitFetch(`${GO_API_URL}/workouts/${workoutId}`, {
+		const response = await fetch(`${GO_API_URL}/workouts/${workoutId}`, {
 			headers: {
 				Authorization: `Bearer ${locals.token}`
 			}
@@ -70,7 +70,7 @@ export const load: PageServerLoad = async ({ locals, fetch: svelteKitFetch, para
 };
 
 export const actions: Actions = {
-	updateWorkout: async ({ request, fetch: svelteKitFetch, locals, params, cookies }) => {
+	updateWorkout: async ({ request, fetch, locals, params, cookies }) => {
 		if (!locals.token) {
 			return fail(401, { formError: 'Authentication required.' });
 		}
@@ -123,7 +123,7 @@ export const actions: Actions = {
 		};
 
 		try {
-			const response = await svelteKitFetch(`${GO_API_URL}/workouts/${workoutId}`, {
+			const response = await fetch(`${GO_API_URL}/workouts/${workoutId}`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',

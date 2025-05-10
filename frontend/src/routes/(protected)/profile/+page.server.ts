@@ -1,11 +1,58 @@
-import type { PageServerLoad } from './$types';
+import { redirect, fail, isRedirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+
+const GO_API_URL = process.env.PRIVATE_GO_API_URL || 'http://app:8080';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	// The (protected)/+layout.server.ts ensures authentication.
-	// locals.user will be undefined in this "no backend change" setup.
-	// The profile page will primarily confirm the user is logged in.
-	// No specific data needs to be loaded here for the profile page itself.
 	return {
-		// user: locals.user // This is available from root layout data, will be undefined
+		user: locals.user 
 	};
 };
+
+export const actions: Actions = {
+update_profile: async ({ request }) => {
+	const formData = await request.formData();
+	console.log('Form Data Update:', formData);	
+	const username = formData.get('username')?.toString() || '';
+	const bio = formData.get('bio')?.toString() || '';
+	const password = formData.get('password')?.toString() || '';
+
+	const formValues = { username, bio }; // For repopulating form
+
+	if (!username || !password) {
+		return {
+			status: 400,
+			body: { ...formValues, message: 'Username and password are required.' }
+		};
+	}
+	if (password.length < 3) { // Example additional validation
+			return fail(400, { ...formValues, message: 'Password must be at least 3 characters long.' });
+	}
+
+
+	try {
+		const response = await fetch(`${GO_API_URL}/users/update`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ username, password, bio })
+		});
+
+		if (response.ok) { // Backend returns 201 Updated with success
+			throw redirect(303, '/profile?updated=true');
+		} else {
+			const result = await response.json().catch(() => ({ error: 'Update failed and could not parse error response.' }));
+			return fail(response.status || 400, {
+				...formValues,
+				message: result.error || result.message || 'Update failed. Please try again.'
+			});
+		}
+	} catch (error: any) {
+		if (isRedirect(error)) {
+			throw error;
+		}
+		console.error("Register action unexpected error: ", error);
+		return fail(500, {
+			...formValues, message: 'An unexpected error occurred during update.'
+		});
+	}
+}};

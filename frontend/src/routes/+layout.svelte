@@ -2,6 +2,9 @@
 	import '../app.css';
 	import { page } from '$app/stores';
 
+	export let data;
+	console.log('Layout data:', data);
+
 </script>
 
 <div class="min-h-screen bg-gray-900 text-white">

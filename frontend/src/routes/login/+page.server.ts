@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	user_login: async ({ request, cookies, fetch: svelteKitFetch, locals, url: pageUrl }) => {
+	user_login: async ({ request, cookies, fetch, locals, url: pageUrl }) => {
 		const data = await request.formData();
 		const username = data.get('username')?.toString() || '';
 		const password = data.get('password')?.toString() || '';
@@ -23,7 +23,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			const response = await svelteKitFetch(`${GO_API_URL}/tokens/authentication`, {
+			const response = await fetch(`${GO_API_URL}/tokens/authentication`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ username, password })

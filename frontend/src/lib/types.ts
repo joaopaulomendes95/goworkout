@@ -1,3 +1,6 @@
+// general types to be used in the client,
+// this are supossed to mirror the go backend entities
+
 export interface BackendUser {
     id: number;
     username: string;

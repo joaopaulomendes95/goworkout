@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-	user_register: async ({ request, fetch: svelteKitFetch }) => {
+	user_register: async ({ request, fetch }) => {
 		const data = await request.formData();
 		const username = data.get('username')?.toString() || '';
 		const email = data.get('email')?.toString() || '';
@@ -24,13 +24,13 @@ export const actions: Actions = {
 		if (!username || !email || !password) {
 			return fail(400, { ...formValues, message: 'Username, email, and password are required.' });
 		}
-		if (password.length < 8) { // Example additional validation
-            return fail(400, { ...formValues, message: 'Password must be at least 8 characters long.' });
-        }
+		if (password.length < 3) { // Example additional validation
+            return fail(400, { ...formValues, message: 'Password must be at least 3 characters long.' });
+		}
 
 
 		try {
-			const response = await svelteKitFetch(`${GO_API_URL}/users`, {
+			const response = await fetch(`${GO_API_URL}/users`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ username, email, password, bio })

@@ -13,7 +13,6 @@ declare global {
         interface PageData {
             authenticated: boolean;
             user?: BackendUser;
-            authenticated?: boolean;
             workouts?: BackendWorkout[]; // Use imported type
             workout?: BackendWorkout; // Use imported type
             error?: { message: string };

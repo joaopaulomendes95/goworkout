@@ -2,10 +2,10 @@ import { error } from '@sveltejs/kit';
 
 const GO_API_URL = process.env.PRIVATE_GO_API_URL || 'http://app:8080';
 
-export async function load({ fetch: svelteKitFetch }) {
+export async function load({ fetch, locals }) {
 	async function getHealth() {
 		try {
-			const healthResponse = await svelteKitFetch(`${GO_API_URL}/health`); // Use SvelteKit's fetch
+			const healthResponse = await fetch(`${GO_API_URL}/health`); // Use SvelteKit's fetch
 			if (!healthResponse.ok) {
 				console.error('Health check failed:', healthResponse.status, await healthResponse.text());
 				// Return an error structure that the page can display
@@ -20,6 +20,7 @@ export async function load({ fetch: svelteKitFetch }) {
 
 	const healthData = await getHealth();
 	return {
-		health: healthData // This will include status and potentially an error message
+		health: healthData, // This will include status and potentially an error message
+		user: locals.user,
 	};
 }

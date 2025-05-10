@@ -4,14 +4,14 @@ import type { BackendWorkout } from '$lib/types';
 
 const GO_API_URL = process.env.PRIVATE_GO_API_URL || 'http://app:8080';
 
-export const load: PageServerLoad = async ({ locals, fetch: svelteKitFetch, cookies, url }) => {
+export const load: PageServerLoad = async ({ locals, fetch, cookies, url }) => {
 	if (!locals.authenticated || !locals.token) {
 		throw redirect(303, `/login?redirectTo=${encodeURIComponent(url.pathname + url.search)}`);
 	}
 
 	try {
 		console.log('[Workouts Load] Fetching from:', `${GO_API_URL}/workouts/`);
-		const response = await svelteKitFetch(`${GO_API_URL}/workouts/`, {
+		const response = await fetch(`${GO_API_URL}/workouts/`, {
 			headers: {
 				Authorization: `Bearer ${locals.token}`
 			}
@@ -72,7 +72,7 @@ export const load: PageServerLoad = async ({ locals, fetch: svelteKitFetch, cook
 };
 
 export const actions: Actions = {
-	addWorkout: async ({ request, fetch: svelteKitFetch, locals, cookies }) => {
+	addWorkout: async ({ request, fetch, locals, cookies }) => {
 		if (!locals.token) {
 			return fail(401, { formError: 'Authentication required.' });
 		}
@@ -125,7 +125,7 @@ export const actions: Actions = {
 		};
 
 		try {
-			const response = await svelteKitFetch(`${GO_API_URL}/workouts/`, {
+			const response = await fetch(`${GO_API_URL}/workouts/`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ export const actions: Actions = {
 		}
 	},
 
-	deleteWorkout: async ({ request, fetch: svelteKitFetch, locals, cookies }) => {
+	deleteWorkout: async ({ request, fetch, locals, cookies }) => {
 		if (!locals.token) return fail(401, { message: 'Authentication required.' }); // This fail was correctly imported implicitly
 
 		const formData = await request.formData();
@@ -161,7 +161,7 @@ export const actions: Actions = {
 		if (!workoutId) return fail(400, { message: 'Workout ID missing.' });
 
 		try {
-			const response = await svelteKitFetch(`${GO_API_URL}/workouts/${workoutId}`, {
+			const response = await fetch(`${GO_API_URL}/workouts/${workoutId}`, {
 				method: 'DELETE',
 				headers: { Authorization: `Bearer ${locals.token}` }
 			});

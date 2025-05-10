@@ -5,10 +5,13 @@
 
 	const health = $derived(data.health);
 	const authenticated = $derived(data.authenticated);
+
+	console.log('Page data:', data);
 </script>
 
 <main class="flex min-h-[calc(100vh-150px)] flex-col items-center justify-center text-center">
 	<h1 class="mb-6 text-4xl font-bold">Welcome to GoWorkout!</h1>
+	<h1 class="mb-6 text-4xl font-bold">{ data.user.user.username }</h1>
 
 	{#if health}
 		<div class="mb-6 rounded-lg bg-gray-800 p-4 shadow">

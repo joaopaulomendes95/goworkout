@@ -112,3 +112,25 @@ func (h *UserAPI) HandleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"user": user})
 }
+
+func (h *UserAPI) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUser(r)
+	if user.IsAnonymous() {
+		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "User is anonymous"})
+		return
+	}
+
+	if user == nil {
+		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "unauthorized"})
+		return
+	}
+
+	err := h.userStore.UpdateUser(user)
+	if err != nil {
+		h.logger.Printf("ERROR: updating user: %v", err)
+		utils.WriteJSON(w, http.StatusInternalServerError, utils.Envelope{"error": "internal server error"})
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"user": user})
+}

@@ -9,6 +9,16 @@ curl -X POST "http://localhost:8080/users" \
           "bio": "Physical activity noob"
         }'
 
+// Update user
+
+ curl -X PUT "http://localhost:8080/users/me" \
+      -H "Authorization: Bearer MFF7F3PAUA65OX542TQWM2ZR2KCU37WMT4ZD4FASWYSTJODIKYRQ" \
+      -d '{
+            "username": "69420",
+            "password": "123",
+            "bio": "good try",
+          }'
+
 
 // Create Token
 

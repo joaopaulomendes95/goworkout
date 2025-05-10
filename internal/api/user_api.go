@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/strangecousinwst/goworkout/internal/middleware"
 	"github.com/strangecousinwst/goworkout/internal/store"
 	"github.com/strangecousinwst/goworkout/internal/utils"
 )
@@ -100,4 +101,14 @@ func (h *UserAPI) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"user": user})
+}
+
+func (h *UserAPI) HandleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUser(r)
+	if user == nil {
+		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "unauthorized"})
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"user": user})
 }

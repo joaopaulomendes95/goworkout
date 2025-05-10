@@ -25,6 +25,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(s.Middleware.Authenticate)
 
+		r.Get("/users/me", s.Middleware.RequireUser(s.UserAPI.HandleGetCurrentUser))
 		r.Get("/workouts/", s.Middleware.RequireUser(s.WorkoutAPI.HandleGetUserWorkouts))
 		r.Get("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleGetWorkoutByID))
 		r.Post("/workouts/", s.Middleware.RequireUser(s.WorkoutAPI.HandleCreateWorkout))

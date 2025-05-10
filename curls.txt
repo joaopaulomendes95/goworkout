@@ -11,12 +11,12 @@ curl -X POST "http://localhost:8080/users" \
 
 // Update user
 
- curl -X PUT "http://localhost:8080/users/me" \
-      -H "Authorization: Bearer MFF7F3PAUA65OX542TQWM2ZR2KCU37WMT4ZD4FASWYSTJODIKYRQ" \
-      -d '{
-            "username": "69420",
-            "password": "123",
-            "bio": "good try",
+curl -X PUT "http://localhost:8080/users/me" \
+     -H "Authorization: Bearer IJPY424XKRR6U74Q5MXTSFVS7YYBVLWBHB5LLZ6VNU6CHOOVQICA" \
+     -H "Content-Type': 'application/json" \
+     -d '{
+          "username": "69420",
+          "bio": "good try",
           }'
 
 

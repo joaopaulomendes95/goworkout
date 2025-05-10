@@ -4,37 +4,37 @@ import type { Actions, PageServerLoad } from './$types';
 const GO_API_URL = process.env.PRIVATE_GO_API_URL || 'http://app:8080';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	return {
-		user: locals.user 
-	};
+	console.log('[Profile Load Page] Current usser :', locals.user);
+	return { user: locals.user };
 };
 
 export const actions: Actions = {
-update_profile: async ({ request }) => {
+update_profile: async ({ request, cookies, locals }) => {
 	const formData = await request.formData();
 	console.log('Form Data Update:', formData);	
 	const username = formData.get('username')?.toString() || '';
 	const bio = formData.get('bio')?.toString() || '';
-	const password = formData.get('password')?.toString() || '';
 
-	const formValues = { username, bio }; // For repopulating form
+	const formValues = { username, bio, }; // For repopulating form
 
-	if (!username || !password) {
+	if (!username) {
 		return {
 			status: 400,
 			body: { ...formValues, message: 'Username and password are required.' }
 		};
 	}
-	if (password.length < 3) { // Example additional validation
-			return fail(400, { ...formValues, message: 'Password must be at least 3 characters long.' });
-	}
 
+	const token = cookies.get('auth_token');
+	console.log('Token:', token);
 
 	try {
 		const response = await fetch(`${GO_API_URL}/users/update`, {
 			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ username, password, bio })
+			headers: {
+				'Content-Type': 'application/json',
+				'Authization': `Bearer ${token}` // Include the token in the request headers
+			},
+			body: JSON.stringify({ username, bio })
 		});
 
 		if (response.ok) { // Backend returns 201 Updated with success

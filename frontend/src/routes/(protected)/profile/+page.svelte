@@ -40,14 +40,6 @@
 						placeholder="Tell us about yourself"
 						bind:value={bio}
 						class="mt-1 block w-full rounded-md border-gray-300 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-				<label for="password" class="mt-4 block text-sm font-medium text-gray-300">
-					Password:</label>
-					<input
-					 	name="password"
-						type="password"
-						placeholder="*********"
-						class="mt-1 block w-full rounded-md border-gray-300 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-					/>
 				<button type="submit" class="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
 					Update
 				</button>

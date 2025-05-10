@@ -34,7 +34,7 @@ export const actions: Actions = {
 			if (response.ok && result.auth_token?.token) {
 				locals.token = result.auth_token.token;
 				locals.authenticated = true;
-				// locals.user remains undefined
+				locals.user = result.user;
 
 				cookies.set('auth_token', result.auth_token.token, {
 					path: '/',

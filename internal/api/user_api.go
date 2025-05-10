@@ -24,6 +24,11 @@ type UserAPI struct {
 	logger    *log.Logger
 }
 
+type updateUserRequest struct {
+	Username string `json:"username"`
+	Bio      string `json:"bio"`
+}
+
 func NewUserAPI(userStore store.UserStore, logger *log.Logger) *UserAPI {
 	return &UserAPI{
 		userStore: userStore,
@@ -114,18 +119,22 @@ func (h *UserAPI) HandleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserAPI) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
+	var req updateUserRequest
+
 	user := middleware.GetUser(r)
 	if user.IsAnonymous() {
 		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "User is anonymous"})
 		return
 	}
 
-	if user == nil {
-		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "unauthorized"})
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		h.logger.Printf("ERROR: decoding update user request: %v", err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"error": "invalid request payload"})
 		return
 	}
 
-	err := h.userStore.UpdateUser(user)
+	err = h.userStore.UpdateUser(user)
 	if err != nil {
 		h.logger.Printf("ERROR: updating user: %v", err)
 		utils.WriteJSON(w, http.StatusInternalServerError, utils.Envelope{"error": "internal server error"})

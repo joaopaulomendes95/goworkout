@@ -22,6 +22,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 
+	// Public endpoints
+	// Health check
+	r.Get("/health", s.healthHandler)
+	// Create new user
+	r.Post("/users", s.UserAPI.HandleRegisterUser)
+	// Login user / create token
+	r.Post("/tokens/authentication", s.TokenAPI.HandleCreateToken)
+
 	// Grouping this enpdoints to be protected by the authentication middleware
 	r.Group(func(r chi.Router) {
 		r.Use(s.Middleware.Authenticate)
@@ -41,14 +49,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 		// Delete a specific workout
 		r.Delete("/workouts/{id}", s.Middleware.RequireUser(s.WorkoutAPI.HandleDeleteWorkoutByID))
 	})
-
-	// Public endpoints
-	// Health check
-	r.Get("/health", s.healthHandler)
-	// Create new user
-	r.Post("/users", s.UserAPI.HandleRegisterUser)
-	// Login user / create token
-	r.Post("/tokens/authentication", s.TokenAPI.HandleCreateToken)
 
 	return r
 }

@@ -2,6 +2,7 @@ package store
 
 import "database/sql"
 
+// Workout represents a workout session.
 type Workout struct {
 	ID              int            `json:"id"`
 	UserID          int            `json:"user_id"`
@@ -12,6 +13,7 @@ type Workout struct {
 	Entries         []WorkoutEntry `json:"entries"`
 }
 
+// WorkoutEntry represents an entry in a workout session.
 type WorkoutEntry struct {
 	ID              int      `json:"id"`
 	ExerciseName    string   `json:"exercise_name"`
@@ -23,16 +25,19 @@ type WorkoutEntry struct {
 	OrderIndex      int      `json:"order_index"`
 }
 
+// PostgresWorkoutStore implements the WorkoutStore interface using a PostgreSQL database.
 type PostgresWorkoutStore struct {
 	db *sql.DB
 }
 
+// NewPostgresWorkoutStore creates a new instance of PostgresWorkoutStore.
 func NewPostgresWorkoutStore(db *sql.DB) *PostgresWorkoutStore {
 	return &PostgresWorkoutStore{
 		db: db,
 	}
 }
 
+// WorkoutStore defines the interface for operations related to workout data.
 type WorkoutStore interface {
 	CreateWorkout(*Workout) (*Workout, error)
 	GetWorkoutByID(id int) (*Workout, error)
@@ -42,6 +47,8 @@ type WorkoutStore interface {
 	GetWorkoutsForUser(id int) ([]Workout, error)
 }
 
+// CreateWorkout inserts a new workout into the database.
+// It returns the created workout with its ID and entries populated.
 func (s *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error) {
 	tx, err := s.db.Begin()
 	if err != nil {
@@ -104,6 +111,8 @@ func (s *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error)
 	return workout, nil
 }
 
+// GetWorkoutByID retrieves a workout by its ID from the database.
+// It returns the workout details, including its entries, or nil if not found.
 func (pg *PostgresWorkoutStore) GetWorkoutByID(id int) (*Workout, error) {
 	workout := &Workout{}
 	query := `
@@ -156,6 +165,8 @@ func (pg *PostgresWorkoutStore) GetWorkoutByID(id int) (*Workout, error) {
 	return workout, nil
 }
 
+// UpdateWorkout modifies an existing workout in the database.
+// It updates the workout details and its entries.
 func (pg *PostgresWorkoutStore) UpdateWorkout(workout *Workout) error {
 	tx, err := pg.db.Begin()
 	if err != nil {
@@ -212,6 +223,8 @@ func (pg *PostgresWorkoutStore) UpdateWorkout(workout *Workout) error {
 	return tx.Commit()
 }
 
+// DeleteWorkout removes a workout from the database by its ID.
+// It also deletes all associated entries.
 func (pg *PostgresWorkoutStore) DeleteWorkout(id int) error {
 	query := `
 	DELETE FROM workouts
@@ -234,6 +247,8 @@ func (pg *PostgresWorkoutStore) DeleteWorkout(id int) error {
 	return nil
 }
 
+// GetWorkoutOwner retrieves the user ID of the owner of a specific workout.
+// It returns the user ID or an error if the workout is not found.
 func (pg *PostgresWorkoutStore) GetWorkoutOwner(workoutID int) (int, error) {
 	var userID int
 
@@ -251,6 +266,9 @@ func (pg *PostgresWorkoutStore) GetWorkoutOwner(workoutID int) (int, error) {
 	return userID, nil
 }
 
+// GetWorkoutsForUser retrieves all workouts for a specific user.
+// It returns a slice of workouts, each with its entries populated.
+// If no workouts are found, it returns an empty slice.
 func (pg *PostgresWorkoutStore) GetWorkoutsForUser(userID int) ([]Workout, error) {
 	query := `
     SELECT id, user_id, title, description, duration_minutes, calories_burned
@@ -280,13 +298,9 @@ func (pg *PostgresWorkoutStore) GetWorkoutsForUser(userID int) ([]Workout, error
 			return nil, err
 		}
 
-		// For each workout, you might want to fetch its entries as well
-		// This makes the response more complete but adds N+1 query potential if not careful
-		// Option 1: Fetch entries here (N+1 potential)
 		entryQuery := `SELECT id, exercise_name, sets, reps, duration_seconds, weight, notes, order_index FROM workout_entries WHERE workout_id = $1 ORDER BY order_index`
 		entryRows, entryErr := pg.db.Query(entryQuery, w.ID)
 		if entryErr != nil {
-			// Log error, decide if you want to return partial data or full error
 			return nil, entryErr
 		}
 		defer entryRows.Close()
@@ -310,11 +324,10 @@ func (pg *PostgresWorkoutStore) GetWorkoutsForUser(userID int) ([]Workout, error
 			entries = append(entries, entry)
 		}
 		w.Entries = entries
-		// End Option 1
 
 		workouts = append(workouts, w)
 	}
-	if err = rows.Err(); err != nil { // Check for errors during iteration
+	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 

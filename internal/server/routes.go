@@ -8,6 +8,9 @@ import (
 	"github.com/go-chi/cors"
 )
 
+// RegisterRoutes sets up the HTTP routes for the server.
+// It uses the chi router and applies middleware for logging, recovery, and CORS.
+// The routes are organized into public and protected endpoints.
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
 

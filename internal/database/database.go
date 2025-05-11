@@ -25,14 +25,18 @@ type Service interface {
 	// It returns an error if the connection cannot be closed.
 	Close() error
 
-	// Gets a pointer to the database
+	// GetDB returns a pointer to the underlying *sql.DB object
+	// for direct database operations.
 	GetDB() *sql.DB
 }
 
+// service is a concrete implementation of the Service interface.
+// It holds a pointer to the database connection.
 type service struct {
 	db *sql.DB
 }
 
+// Configuration variables loaded from environment.
 var (
 	database   = os.Getenv("GOWORKOUT_DB_DATABASE")
 	password   = os.Getenv("GOWORKOUT_DB_PASSWORD")
@@ -43,27 +47,38 @@ var (
 	dbInstance *service
 )
 
+// New initializes and returns a database service instance.
+// It uses a singleton pattern to ensure only one database connection pool is created.
 func New() Service {
-	// Reuse Connection
+	// Reuse Connection if it already exists
 	if dbInstance != nil {
 		return dbInstance
 	}
 
+	// construct the database connection string
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
+
+	// Open a new database connection
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	dbInstance = &service{
 		db: db,
 	}
+
 	return dbInstance
 }
 
+// GetDB returns the raw *sql.DB object from the service.
+// This allows other parts of the application to perform database operations.
 func (s *service) GetDB() *sql.DB {
 	return s.db
 }
 
+// MigrateFS applies database migrations from an embedded filesystem.
+// It sets the base filesystem for Goose, then calls Migrate.
 func MigrateFS(db *sql.DB, migrationsFS fs.FS, dir string) error {
 	goose.SetBaseFS(migrationsFS)
 	defer func() {
@@ -73,6 +88,8 @@ func MigrateFS(db *sql.DB, migrationsFS fs.FS, dir string) error {
 	return Migrate(db, dir)
 }
 
+// Migrate applies database migrations from the specified directory using Goose.
+// It sets the SQL dialect to "postgres" and runs pending "up" migrations.
 func Migrate(db *sql.DB, dir string) error {
 	err := goose.SetDialect("postgres")
 	if err != nil {
@@ -95,12 +112,13 @@ func (s *service) Health() map[string]string {
 
 	stats := make(map[string]string)
 
-	// Ping the database
+	// Ping the database to verify connectivity
 	err := s.db.PingContext(ctx)
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
-		log.Fatalf("db down: %v", err) // Log the error and terminate the program
+		// Log the error and terminate the program
+		log.Fatalf("db down: %v", err)
 		return stats
 	}
 

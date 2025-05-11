@@ -15,7 +15,8 @@ type password struct {
 	hash      []byte
 }
 
-// Set plain text password to hash password
+// Set hashes the given plaintext password using bcrypt and stores the hash.
+// The plaintext password itself is also stored temporarily in the struct.
 func (p *password) Set(plainTextPassword string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(plainTextPassword), 12)
 	if err != nil {
@@ -27,7 +28,8 @@ func (p *password) Set(plainTextPassword string) error {
 	return nil
 }
 
-// See if plain text password matches to hash password
+// Matches compares a given plaintext password against the stored bcrypt hash.
+// It returns true if they match, false otherwise.
 func (p *password) Matches(plainTextPassword string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword(p.hash, []byte(plainTextPassword))
 	if err != nil {
@@ -42,7 +44,7 @@ func (p *password) Matches(plainTextPassword string) (bool, error) {
 	return true, nil
 }
 
-// User struct, to pass users arround app
+// User defines the structure for a user in the application.
 type User struct {
 	ID           int       `json:"id"`
 	Username     string    `json:"username"`
@@ -53,25 +55,28 @@ type User struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+// AnonymousUser represents an unauthenticated or guest user.
+// This can be used in middleware to represent a user state before authentication.
 var AnonymousUser = &User{}
 
+// IsAnonymous checks if the user instance is the AnonymousUser.
 func (u *User) IsAnonymous() bool {
 	return u == AnonymousUser
 }
 
-// struct for db operations
+// PostgresUserStore implements the UserStore interface using a PostgreSQL database.
 type PostgresUserStore struct {
 	db *sql.DB
 }
 
-// constructor function
+// NewPostgresUserStore creates a new instance of PostgresUserStore.
 func NewPostgresUserStore(db *sql.DB) *PostgresUserStore {
 	return &PostgresUserStore{
 		db: db,
 	}
 }
 
-// interface to do db operations
+// UserStore defines the interface for operations related to user data.
 type UserStore interface {
 	CreateUser(*User) error
 	GetUserByUsername(username string) (*User, error)
@@ -79,7 +84,8 @@ type UserStore interface {
 	GetUserToken(scope, tokenPlainText string) (*User, error)
 }
 
-// Create a new user
+// CreateUser inserts a new user record into the 'users' table.
+// It hashes the user's password before storage and returns the user's ID and timestamps.
 func (s *PostgresUserStore) CreateUser(user *User) error {
 	query := `
 	INSERT INTO users (username, email, password_hash, bio)
@@ -105,7 +111,8 @@ func (s *PostgresUserStore) CreateUser(user *User) error {
 	return nil
 }
 
-// get user given a username
+// GetUserByUsername retrieves a user from the database by their username.
+// It returns the user details, including the password hash, or nil if not found.
 func (s *PostgresUserStore) GetUserByUsername(username string) (*User, error) {
 	user := &User{
 		PasswordHash: password{},
@@ -139,7 +146,8 @@ func (s *PostgresUserStore) GetUserByUsername(username string) (*User, error) {
 	return user, nil
 }
 
-// update a user
+// UpdateUser modifies an existing user's details (username, bio) in the database.
+// It updates the 'updated_at' timestamp.
 func (s *PostgresUserStore) UpdateUser(user *User) error {
 	query := `
 	UPDATE users
@@ -169,8 +177,11 @@ func (s *PostgresUserStore) UpdateUser(user *User) error {
 	return nil
 }
 
-// gets the user token
+// GetUserToken retrieves a user based on a token's plaintext value and scope.
+// The plaintext token is hashed (SHA256) before querying the database.
+// This is used by the authentication middleware to validate tokens.
 func (s *PostgresUserStore) GetUserToken(scope, plainTextPassword string) (*User, error) {
+	// Hash the plaintext using SHA256
 	tokenHash := sha256.Sum256([]byte(plainTextPassword))
 
 	query := `

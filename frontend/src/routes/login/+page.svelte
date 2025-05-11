@@ -37,7 +37,7 @@
 
     <form method="POST" action="?/user_login" use:enhance class="space-y-6">
         <div>
-            <label for="username" class={labelClasses}>Username</label>
+            <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-30">Username</label>
             <input
                 bind:value={currentUsername}
                 id="username"

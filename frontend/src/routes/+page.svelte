@@ -9,7 +9,7 @@
 	console.log('Page data:', data);
 </script>
 
-<main class="flex min-h-[calc(100vh-150px)] flex-col items-center justify-center text-center">
+<main class="container">
 	<h1 class="mb-6 text-4xl font-bold">Welcome to GoWorkout!</h1>
 	<h1 class="mb-6 text-4xl font-bold">{ data.user.user.username }</h1>
 
@@ -34,18 +34,4 @@
 		Track your fitness journey, log workouts, and achieve your goals.
 	</p>
 
-	<nav class="space-x-4">
-		{#if authenticated}
-			<a href="/workouts" class="rounded bg-blue-600 px-6 py-3 text-white hover:bg-blue-700">
-				Go to Workouts
-			</a>
-		{:else}
-			<a href="/login" class="rounded bg-blue-600 px-6 py-3 text-white hover:bg-blue-700">
-				Login
-			</a>
-			<a href="/register" class="rounded bg-gray-600 px-6 py-3 text-white hover:bg-gray-700">
-				Register
-			</a>
-		{/if}
-	</nav>
 </main>

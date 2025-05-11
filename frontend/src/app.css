@@ -6,4 +6,25 @@
 	html {
 		@apply bg-black text-white;
 	}
+	h1 {
+		@apply text-3xl font-bold;
+	}
+	p {
+		@apply mt-2 text-sm text-gray-400;
+	}
+}
+
+@layer components {
+	.container {
+		@apply flex min-h-[calc(100vh-150px)] flex-col items-center justify-center text-center;
+	}
+	.customButton {
+		@apply w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500;
+	}
+	.customInput {
+		@apply mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-white;
+	}
+	.customLabel {
+		@apply block text-sm font-medium text-gray-300;
+	}
 }

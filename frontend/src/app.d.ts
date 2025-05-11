@@ -10,14 +10,6 @@ declare global {
             token?: string;
             user?: BackendUser;
         }
-        interface PageData {
-            authenticated: boolean;
-            user?: BackendUser;
-            workouts?: BackendWorkout[];
-            workout?: BackendWorkout;
-            error?: { message: string };
-            [key: string]: any;
-        }
         // interface Error {}
         // interface Platform {}
     }

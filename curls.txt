@@ -20,7 +20,7 @@ curl -X POST "http://localhost:8080/tokens/authentication" \
 
 // Update user
 
-curl -X PUT "http://localhost:8080/users/update" \
+curl -X PUT "http://localhost:8080/users/me" \
      -H "Authorization: Bearer IJPY424XKRR6U74Q5MXTSFVS7YYBVLWBHB5LLZ6VNU6CHOOVQICA" \
      -H "Content-Type: application/json" \
      -d '{

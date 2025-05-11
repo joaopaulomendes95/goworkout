@@ -1,5 +1,6 @@
 import { redirect, fail, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import type { BackendUser } from '$lib/types';
 
 const GO_API_URL = process.env.PRIVATE_GO_API_URL || 'http://app:8080';
 

@@ -17,7 +17,7 @@
 
 <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-lg shadow-xl mx-auto mt-10">
     <div class="text-center">
-        <h1 class="text-3xl font-bold tracking-tight">Log in</h1>
+        <h1>Log in</h1>
         <p class="mt-2 text-sm text-gray-400">Access your GoWorkout account</p>
     </div>
 
@@ -44,23 +44,23 @@
                 name="username"
                 type="text"
                 required
-                class={inputClasses}
+                class="customInput"
                 placeholder="Your username"
             />
         </div>
         <div>
-            <label for="password" class={labelClasses}>Password</label>
+            <label for="password" class="customLabel">Password</label>
             <input
                 bind:value={currentPassword}
                 id="password"
                 name="password"
                 type="password"
                 required
-                class={inputClasses}
+                class="customInput"
                 placeholder="••••••••"
             />
         </div>
-        <button type="submit" class={buttonClasses}>
+        <button type="submit" class="customButton">
             Log in
         </button>
     </form>

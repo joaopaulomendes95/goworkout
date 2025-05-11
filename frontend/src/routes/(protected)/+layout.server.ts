@@ -2,7 +2,8 @@ import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ url, parent }) => {
-	const parentData = await parent(); // Gets { authenticated, user } from root layout
+	// Gets { authenticated, user } from root layout
+	const parentData = await parent(); 
 
 	if (!parentData.authenticated) {
 		// Redirect to login page and store intended destination

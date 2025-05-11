@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { BackendUser } from '$lib/types'; // Not strictly needed if user is always undefined here
 
 	const {data} = $props();
 	console.log('Profile data: ', data);
 
-	let username = $state(data.user?.user?.username);
-	let bio = $state(data.user?.user?.bio);
+	let username = $state(data.user?.user.username);
+	let bio = $state(data.user?.user.bio);
 
 	$effect(() => {
 		console.log('Username: ', username);
@@ -19,9 +18,11 @@
 
 	{#if $page.data.authenticated}
 		<div class="rounded-lg bg-gray-800 p-6 shadow-md">
-			<p class="text-lg text-white">You are logged in.</p>
+			<p class="text-lg text-white">
+				You are logged in as {data.user?.user.username}.
+			</p>
 			<p class="mt-2 text-gray-400">
-				This is your profile page {data.user?.user?.username}. Your GoWorkout journey starts here!
+				This is your profile page. Your GoWorkout journey starts here!
 			</p>
 			<form method="POST" action="?/update_profile" class="mt-4">
 				<label for="username" class="mt-4 block text-sm font-medium text-gray-300">
@@ -50,7 +51,6 @@
 			</p>
 		</div>
 	{:else}
-		<!-- This case should ideally not be reached due to (protected) layout -->
 		<p class="text-red-400">You are not logged in. Please <a href="/login" class="underline">login</a>.</p>
 	{/if}
 </div>

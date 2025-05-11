@@ -3,10 +3,19 @@
 curl -X POST "http://localhost:8080/users" \
      -H "Content-Type: application/json" \
      -d '{
-          "username": "joao",
-          "email": "joao@mail.com",
-          "password": "SecureP@ssword123",
-          "bio": "Physical activity noob"
+          "username": "zacarias",
+          "email": "zacarias@mail.com",
+          "password": "123123123",
+          "bio": "Avid runner"
+        }'
+
+// Create Token
+
+curl -X POST "http://localhost:8080/tokens/authentication" \
+     -H "Content-Type: application/json" \
+     -d '{
+          "username": "zacarias",
+          "password": "123123123"
         }'
 
 // Update user
@@ -15,19 +24,10 @@ curl -X PUT "http://localhost:8080/users/update" \
      -H "Authorization: Bearer IJPY424XKRR6U74Q5MXTSFVS7YYBVLWBHB5LLZ6VNU6CHOOVQICA" \
      -H "Content-Type: application/json" \
      -d '{
-          "username": "69420",
-          "bio": "good try"
+          "username": "Zacarias",
+          "bio": "Nature enjoyer and avid runner"
           }'
 
-
-// Create Token
-
-curl -X POST "http://localhost:8080/tokens/authentication" \
-     -H "Content-Type: application/json" \
-     -d '{
-          "username": "joao",
-          "password": "SecureP@ssword123"
-        }'
 
 // Create workout
 

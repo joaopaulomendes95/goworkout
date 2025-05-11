@@ -8,15 +8,15 @@ declare global {
         interface Locals {
             authenticated: boolean;
             token?: string;
-            user?: BackendUser; // Use imported type
+            user?: BackendUser;
         }
         interface PageData {
             authenticated: boolean;
             user?: BackendUser;
-            workouts?: BackendWorkout[]; // Use imported type
-            workout?: BackendWorkout; // Use imported type
+            workouts?: BackendWorkout[];
+            workout?: BackendWorkout;
             error?: { message: string };
-            [key: string]: any; // Allow any other properties
+            [key: string]: any;
         }
         // interface Error {}
         // interface Platform {}

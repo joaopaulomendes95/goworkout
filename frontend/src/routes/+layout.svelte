@@ -27,7 +27,9 @@
 	</header>
 
 	<main class="container mx-auto p-4">
-		<slot /> <!-- Correct way to render child content (default slot) -->
+		<slot>
+			<h1>This client is still in development.</h1>
+		</slot>
 	</main>
 
 	<footer class="mt-8 border-t border-gray-700 py-4 text-center text-xs text-gray-600">

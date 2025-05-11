@@ -2,7 +2,7 @@ import { derived, type Readable } from 'svelte/store';
 import { page } from '$app/stores';
 
 // This store reflects the authentication state passed from the server
-export const isAuthenticated = Readable<boolean> = derived(
+export const isAuthenticated: Readable<boolean> = derived(
   page,
   ($pageStore) => !!$pageStore.data.authenticated
 );
@@ -11,9 +11,11 @@ export const isAuthenticated = Readable<boolean> = derived(
 export async function clientLogout() {
   const response = await fetch('/logout', { method: 'POST' });
   if (response.ok && response.redirected) {
-    window.location.href = response.url; // Redirect to the URL provided by the server
+    // Redirect to the URL provided by the server
+    window.location.href = response.url; 
   } else if (response.ok) {
-    window.location.href = '/login'; // Fallback  if no redirect
+    // Fallback  if no redirect
+    window.location.href = '/login'; 
   } else {
     console.error("Client-side logout attempt failed.");
   }

@@ -5,7 +5,6 @@
 	const {data} = $props();
 	console.log('Profile data: ', data);
 
-	
 	let username = $state(data.user?.user?.username);
 	let bio = $state(data.user?.user?.bio);
 

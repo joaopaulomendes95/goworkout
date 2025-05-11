@@ -143,15 +143,14 @@ func (s *PostgresUserStore) GetUserByUsername(username string) (*User, error) {
 func (s *PostgresUserStore) UpdateUser(user *User) error {
 	query := `
 	UPDATE users
-	SET username = $1, email = $2, bio = $3, updated_at = CURRENT_TIMESTAMP
-	WHERE id = $4
+	SET username = $1, bio = $2, updated_at = CURRENT_TIMESTAMP
+	WHERE id = $3
 	RETURNING updated_at
 	`
 
 	result, err := s.db.Exec(
 		query,
 		user.Username,
-		user.Email,
 		user.Bio,
 		user.ID,
 	)

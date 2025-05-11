@@ -18,10 +18,9 @@ update_profile: async ({ request, cookies, locals }) => {
 	const formValues = { username, bio, }; // For repopulating form
 
 	if (!username) {
-		return {
-			status: 400,
-			body: { ...formValues, message: 'Username and password are required.' }
-		};
+		return fail(400, {
+			username, bio, message: 'username is required.'
+		});
 	}
 
 	const token = cookies.get('auth_token');

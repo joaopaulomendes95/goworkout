@@ -12,6 +12,7 @@ import (
 	"github.com/strangecousinwst/goworkout/internal/utils"
 )
 
+// registerUserRequest defines the expected JSON structure for a user registration request
 type registerUserRequest struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
@@ -19,16 +20,19 @@ type registerUserRequest struct {
 	Bio      string `json:"bio"`
 }
 
+// UserAPI holds dependencies for user-related API handlers.
 type UserAPI struct {
 	userStore store.UserStore
 	logger    *log.Logger
 }
 
+// updateUserRequest defines the expected JSON structure for a user update request
 type updateUserRequest struct {
 	Username string `json:"username"`
 	Bio      string `json:"bio"`
 }
 
+// NewUserAPI creates a new UserAPI instance with the provided user store and logger.
 func NewUserAPI(userStore store.UserStore, logger *log.Logger) *UserAPI {
 	return &UserAPI{
 		userStore: userStore,
@@ -36,8 +40,9 @@ func NewUserAPI(userStore store.UserStore, logger *log.Logger) *UserAPI {
 	}
 }
 
-// TODO: Implement more validation
+// ValidateRegisterRequest validates the fields of a user registration request.
 func (h *UserAPI) ValidateRegisterRequest(req *registerUserRequest) error {
+	// Validate username
 	if req.Username == "" {
 		return errors.New("username is required")
 	}
@@ -47,6 +52,7 @@ func (h *UserAPI) ValidateRegisterRequest(req *registerUserRequest) error {
 		return errors.New("username must be at most 20 characters long")
 	}
 
+	// Validate email
 	if req.Email == "" {
 		return errors.New("email is required")
 	}
@@ -60,6 +66,7 @@ func (h *UserAPI) ValidateRegisterRequest(req *registerUserRequest) error {
 		return errors.New("invalid email format")
 	}
 
+	// Validate password
 	if req.Password == "" {
 		return errors.New("password is required")
 	}
@@ -67,6 +74,9 @@ func (h *UserAPI) ValidateRegisterRequest(req *registerUserRequest) error {
 	return nil
 }
 
+// HandleRegisterUser handles requests for new user registration.
+// It validates the input, creates a new user with a hashed password,
+// and stores the user in the database.
 func (h *UserAPI) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req registerUserRequest
 
@@ -74,6 +84,7 @@ func (h *UserAPI) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Printf("ERROR: decoding register request: %v", err)
 		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"error": "invalid request payload"})
+		return
 	}
 
 	err = h.ValidateRegisterRequest(&req)
@@ -91,6 +102,7 @@ func (h *UserAPI) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
 		user.Bio = req.Bio
 	}
 
+	// Set and hash the password
 	err = user.PasswordHash.Set(req.Password)
 	if err != nil {
 		h.logger.Printf("ERROR: hashing password: %v", err)
@@ -98,6 +110,7 @@ func (h *UserAPI) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create the user in the database
 	err = h.userStore.CreateUser(user)
 	if err != nil {
 		h.logger.Printf("ERROR: registering user: %v", err)
@@ -108,9 +121,12 @@ func (h *UserAPI) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"user": user})
 }
 
+// HandleGetCurrentUser retrieves and returns the details of the currently authenticated user.
+// The user is identified via the authentication token processed by middleware.
 func (h *UserAPI) HandleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	// Retrieve user from context (set by authentication middleware).
 	user := middleware.GetUser(r)
-	if user == nil {
+	if user == nil || user.IsAnonymous() {
 		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "unauthorized"})
 		return
 	}
@@ -118,9 +134,12 @@ func (h *UserAPI) HandleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"user": user})
 }
 
+// HandleUpdateUser handles requests to update a user's profile information.
+// It allows modification of username and bio for the authenticated user.
 func (h *UserAPI) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	var req updateUserRequest
 
+	// Get the currently authenticated user.
 	currentUser := middleware.GetUser(r)
 	if currentUser.IsAnonymous() {
 		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "User is anonymous"})
@@ -134,6 +153,7 @@ func (h *UserAPI) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Update user fields
 	currentUser.Username = req.Username
 	currentUser.Bio = req.Bio
 

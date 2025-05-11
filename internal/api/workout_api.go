@@ -12,11 +12,13 @@ import (
 	"github.com/strangecousinwst/goworkout/internal/utils"
 )
 
+// WorkoutAPI holds dependencies for workout-related API handlers.
 type WorkoutAPI struct {
 	workoutStore store.WorkoutStore
 	logger       *log.Logger
 }
 
+// NewWorkoutAPI creates a new WorkoutAPI instance with the provided workout store and logger.
 func NewWorkoutAPI(workoutStore store.WorkoutStore, logger *log.Logger) *WorkoutAPI {
 	return &WorkoutAPI{
 		workoutStore: workoutStore,
@@ -24,18 +26,19 @@ func NewWorkoutAPI(workoutStore store.WorkoutStore, logger *log.Logger) *Workout
 	}
 }
 
+// HandleGetUserWorkouts handles requests to get all workouts for the authenticated user.
+// It checks if the user is authenticated and retrieves their workouts from the store.
 func (wh *WorkoutAPI) HandleGetUserWorkouts(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUser(r) // Middleware should have set this
+	// Get the current user from the request context
+	currentUser := middleware.GetUser(r)
 	if currentUser == nil || currentUser.IsAnonymous() {
-		// This should ideally be caught by RequireUser middleware already,
-		// but good for a sanity check.
 		wh.logger.Println("WARN: [WorkoutAPI.HandleGetUserWorkouts] Attempt to get workouts without authenticated user.")
 		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "Authentication required"})
 		return
 	}
 
+	// Get the workouts for the current user
 	wh.logger.Printf("INFO: [WorkoutAPI.HandleGetUserWorkouts] Fetching workouts for user ID: %d", currentUser.ID)
-
 	workouts, err := wh.workoutStore.GetWorkoutsForUser(currentUser.ID)
 	if err != nil {
 		wh.logger.Printf("ERROR: [WorkoutAPI.HandleGetUserWorkouts] Failed to get workouts for user ID %d: %v", currentUser.ID, err)
@@ -43,18 +46,19 @@ func (wh *WorkoutAPI) HandleGetUserWorkouts(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if workouts == nil { // Handle case where GetWorkoutsForUser might return nil slice for no workouts
-		workouts = []store.Workout{} // Return empty array instead of null for JSON
+	// If no workouts are found, initialize an empty slice
+	if workouts == nil {
+		workouts = []store.Workout{}
 	}
 
 	wh.logger.Printf("INFO: [WorkoutAPI.HandleGetUserWorkouts] Successfully fetched %d workouts for user ID: %d", len(workouts), currentUser.ID)
-	// Your SvelteKit frontend expects an array directly, or an object with a "workouts" key.
-	// Let's assume it expects an object like {"workouts": [...]} based on your SvelteKit load function.
-	// If it expects a direct array, change WriteJSON to: utils.WriteJSON(w, http.StatusOK, workouts)
 	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"workouts": workouts})
 }
 
+// HandleGetWorkoutByID handles requests to get a specific workout by its ID.
+// It checks if the user is authenticated and retrieves the workout from the store.
 func (wh *WorkoutAPI) HandleGetWorkoutByID(w http.ResponseWriter, r *http.Request) {
+	// Get the id from the request context
 	workoutID, err := utils.ReadIDParam(r)
 	if err != nil {
 		wh.logger.Printf("ERROR: readIDParam: %v", err)
@@ -62,6 +66,7 @@ func (wh *WorkoutAPI) HandleGetWorkoutByID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Get the workout given the ID
 	workout, err := wh.workoutStore.GetWorkoutByID(workoutID)
 	if err != nil {
 		wh.logger.Printf("ERROR: getWorkoutByID: %v", err)
@@ -72,8 +77,12 @@ func (wh *WorkoutAPI) HandleGetWorkoutByID(w http.ResponseWriter, r *http.Reques
 	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"workout": workout})
 }
 
+// HandleCreateWorkout handles requests to create a new workout.
+// It checks if the user is authenticated and creates the workout in the store.
 func (wh *WorkoutAPI) HandleCreateWorkout(w http.ResponseWriter, r *http.Request) {
 	var workout store.Workout
+
+	// Decode the request body into the workout struct
 	err := json.NewDecoder(r.Body).Decode(&workout)
 	if err != nil {
 		wh.logger.Printf("ERROR: decodingCreateWorkout: %v", err)
@@ -81,6 +90,7 @@ func (wh *WorkoutAPI) HandleCreateWorkout(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// Get the current user from the request context
 	currentUser := middleware.GetUser(r)
 	if currentUser == nil || currentUser == store.AnonymousUser {
 		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"error": "you must be logged in"})
@@ -88,6 +98,7 @@ func (wh *WorkoutAPI) HandleCreateWorkout(w http.ResponseWriter, r *http.Request
 
 	workout.UserID = currentUser.ID
 
+	// Create the workout in the database
 	createdWorkout, err := wh.workoutStore.CreateWorkout(&workout)
 	if err != nil {
 		wh.logger.Printf("ERROR: creatingWorkout: %v", err)
@@ -98,7 +109,9 @@ func (wh *WorkoutAPI) HandleCreateWorkout(w http.ResponseWriter, r *http.Request
 	utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"workout": createdWorkout})
 }
 
+// HandleUpdateWorkoutByID handles requests to update a specific workout by its ID.
 func (wh *WorkoutAPI) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Request) {
+	// Get the ID from the request body
 	workoutID, err := utils.ReadIDParam(r)
 	if err != nil {
 		wh.logger.Printf("ERROR: readIDParam: %v", err)
@@ -106,6 +119,7 @@ func (wh *WorkoutAPI) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Get the workout by ID
 	existingWorkout, err := wh.workoutStore.GetWorkoutByID(workoutID)
 	if err != nil {
 		wh.logger.Printf("ERROR: getWorkoutByID: %v", err)
@@ -118,7 +132,7 @@ func (wh *WorkoutAPI) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// at this point we can assume we are able to find the workout
+	// At this point we can assume we are able to find the workout
 	var updateWorkoutRequest struct {
 		Title           *string              `json:"title"`
 		Description     *string              `json:"description"`
@@ -127,6 +141,7 @@ func (wh *WorkoutAPI) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Req
 		Entries         []store.WorkoutEntry `json:"entries"`
 	}
 
+	// Decode the request body into the updateWorkoutRequest struct
 	err = json.NewDecoder(r.Body).Decode(&updateWorkoutRequest)
 	if err != nil {
 		wh.logger.Printf("ERROR: decondingUpdateRequest: %v", err)
@@ -134,6 +149,7 @@ func (wh *WorkoutAPI) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Validate the request
 	if updateWorkoutRequest.Title != nil {
 		existingWorkout.Title = *updateWorkoutRequest.Title
 	}
@@ -150,12 +166,14 @@ func (wh *WorkoutAPI) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Req
 		existingWorkout.Entries = updateWorkoutRequest.Entries
 	}
 
+	// Get the current user from the request context
 	currentUser := middleware.GetUser(r)
 	if currentUser == nil || currentUser == store.AnonymousUser {
 		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"error": "you must be logged in"})
 		return
 	}
 
+	// Check owner of the workout
 	workoutOwner, err := wh.workoutStore.GetWorkoutOwner(workoutID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -167,11 +185,13 @@ func (wh *WorkoutAPI) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Check if the current user is the owner of the workout
 	if workoutOwner != currentUser.ID {
 		utils.WriteJSON(w, http.StatusForbidden, utils.Envelope{"error": "you do not have permission to update this workout"})
 		return
 	}
 
+	// Update the workout in the database
 	err = wh.workoutStore.UpdateWorkout(existingWorkout)
 	if err != nil {
 		wh.logger.Printf("ERROR: updatingWorkout: %v", err)
@@ -182,7 +202,9 @@ func (wh *WorkoutAPI) HandleUpdateWorkoutByID(w http.ResponseWriter, r *http.Req
 	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"workout": existingWorkout})
 }
 
+// HandleDeleteWorkoutByID handles requests to delete a specific workout by its ID.
 func (wh *WorkoutAPI) HandleDeleteWorkoutByID(w http.ResponseWriter, r *http.Request) {
+	// Get the ID from the request context
 	workoutID, err := utils.ReadIDParam(r)
 	if err != nil {
 		wh.logger.Printf("ERROR: readIDParam: %v", err)
@@ -190,12 +212,14 @@ func (wh *WorkoutAPI) HandleDeleteWorkoutByID(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Get the user from the request context
 	currentUser := middleware.GetUser(r)
 	if currentUser == nil || currentUser == store.AnonymousUser {
 		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"error": "you must be logged in"})
 		return
 	}
 
+	// Get the workout owner
 	workoutOwner, err := wh.workoutStore.GetWorkoutOwner(workoutID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -207,11 +231,13 @@ func (wh *WorkoutAPI) HandleDeleteWorkoutByID(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Check if the current user is the owner of the workout
 	if workoutOwner != currentUser.ID {
 		utils.WriteJSON(w, http.StatusForbidden, utils.Envelope{"error": "you do not have permission to delete this workout"})
 		return
 	}
 
+	// Delete the workout from the database
 	err = wh.workoutStore.DeleteWorkout(workoutID)
 	if err == sql.ErrNoRows {
 		http.Error(w, "workout not found", http.StatusNotFound)

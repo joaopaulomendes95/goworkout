@@ -59,7 +59,7 @@
 				}
 	);
 
-	// MENDES, here we handle form repopulation when there's an error
+	// Handling form repopulation when there's an error
 	$effect(() => {
 		if (form && form.formError && form.title !== undefined) {
 			newWorkoutTitle = form.title || '';
@@ -80,7 +80,7 @@
 		}
 	});
 
-	// MENDES, here we handle redirect messages from the server
+	// handling redirect messages from the server
 	$effect(() => {
 		if (browser) {
 			const messageFromRedirect = $page.url.searchParams.get('message');
@@ -93,7 +93,7 @@
 		}
 	});
 
-	// MENDES, here we handle form feedback and show appropriate toast notifications
+	// handling form feedback and show appropriate toast notifications
 	$effect(() => {
 		const currentForm = form;
 		if (currentForm && !formProcessed) {
@@ -122,7 +122,7 @@
 		}
 	});
 
-	// MENDES, here we create a template for empty exercise entries
+	// creating a template for empty exercise entries
 	function createEmptyEntry(index: number) {
 		return {
 			exercise_name: '',
@@ -144,22 +144,24 @@
 		newWorkoutEntries = [createEmptyEntry(0)];
 	}
 
-	// MENDES, here we add new exercise rows to the workout form
+	// Adding new exercise rows to the workout form
 	function addEntryRow() {
 		newWorkoutEntries = [...newWorkoutEntries, createEmptyEntry(newWorkoutEntries.length)];
 	}
 
-	// MENDES, here we remove exercise rows and update indices
+	// Removing exercise rows and update indices
 	function removeEntryRow(index: number) {
 		newWorkoutEntries = newWorkoutEntries.filter((_, i) => i !== index);
 		// Update order indices
 		newWorkoutEntries = newWorkoutEntries.map((e, i) => ({ ...e, order_index: i + 1 }));
 	}
 
+    // Handling input changes for reps
 	function handleRepsInput(entry: Partial<BackendWorkoutEntry>) {
 		if (entry.reps && entry.reps > 0) entry.duration_seconds = null;
 	}
 
+    // Handling input changes for duration
 	function handleDurationInput(entry: Partial<BackendWorkoutEntry>) {
 		if (entry.duration_seconds && entry.duration_seconds > 0) entry.reps = null;
 	}
@@ -169,11 +171,13 @@
 		expandedWorkoutId = expandedWorkoutId === id ? null : id;
 	}
 
-	// MENDES, here we manage the delete confirmation flow
+	// Managing the delete confirmation flow
 	function confirmDelete(id: string) {
 		workoutToDelete = id;
 	}
 
+    // If the user cancels the delete action
+    // reset workoutToDelete to null
 	function cancelDelete() {
 		workoutToDelete = null;
 	}
@@ -246,7 +250,7 @@
 	</div>
 {/if}
 
-<!-- MENDES, here we create a modal for delete confirmation -->
+<!-- Creating a modal for delete confirmation -->
 {#if workoutToDelete}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
@@ -286,7 +290,7 @@
 {/if}
 
 <div class="mx-auto max-w-4xl space-y-6 p-4 md:p-8">
-	<!-- MENDES, here we display a redesigned stats dashboard with toggle arrow at the bottom -->
+	<!-- Displaying a redesigned stats dashboard with toggle arrow at the bottom -->
 	<section
 		class="relative overflow-hidden rounded-xl border border-orange-900/30 bg-gradient-to-br from-gray-900 via-gray-900 to-gray-900/95 shadow-xl"
 	>
@@ -317,7 +321,7 @@
 			</div>
 		</div>
 
-		<!-- MENDES, here we add the toggle button at the bottom of the stats panel -->
+		<!-- Adding the toggle button at the bottom of the stats panel -->
 		<button
 			class="flex w-full items-center justify-center border-t border-orange-900/30 bg-black/30 py-1.5 text-sm text-orange-400 transition hover:bg-black/40"
 			on:click={() => (showStats = !showStats)}
@@ -402,7 +406,7 @@
 											<h3 class="text-xl font-semibold text-orange-300">{workout.title}</h3>
 										</div>
 
-										<!-- MENDES, here we improved the details toggle button -->
+										<!-- Improving the details toggle button -->
 										<button
 											class="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-400 transition hover:bg-gray-800 hover:text-white"
 											on:click={() => toggleWorkoutDetails(workout.id)}
@@ -466,7 +470,7 @@
 											<li
 												class="relative rounded-md border border-gray-700/50 bg-gray-700/40 p-3 pl-8 text-sm leading-relaxed text-gray-300"
 											>
-												<!-- MENDES, here we fix the exercise number positioning -->
+												<!-- Fixing the exercise number positioning -->
 												<div
 													class="absolute top-3 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-orange-600/80 text-xs font-bold text-white"
 												>
@@ -513,7 +517,7 @@
 		</section>
 	{/if}
 
-	<!-- MENDES, here we completely redesign the Add Workout form to make it more engaging -->
+	<!-- Add Workout form -->
 	{#if activeTab === 'add'}
 		<section
 			in:fade={{ duration: 250 }}
@@ -645,7 +649,7 @@
 								out:fade={{ duration: 120 }}
 								class="relative rounded-lg border border-gray-700/60 bg-gray-800/50 shadow-md"
 							>
-								<!-- MENDES, here we fix the exercise number positioning and make it more visible -->
+								<!-- Exercise number positioning -->
 								<div
 									class="absolute -top-2 left-4 flex h-8 min-w-8 items-center justify-center rounded-md bg-orange-600 px-2 text-sm font-bold text-white shadow-lg"
 								>
@@ -796,7 +800,7 @@
 						class="group relative overflow-hidden rounded-md bg-gradient-to-r from-orange-600 to-orange-500 px-5 py-2.5 text-sm font-medium text-white shadow-lg transition hover:from-orange-500 hover:to-orange-400 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:outline-none"
 					>
 						<span class="relative z-10">Save Workout</span>
-						<!-- MENDES, here we add a cool animation effect to the save button -->
+						<!-- Save button animation -->
 						<span
 							class="absolute inset-0 -translate-x-full transform bg-gradient-to-r from-orange-400/30 via-orange-300/20 to-transparent transition-transform duration-700 ease-in-out group-hover:translate-x-full"
 						></span>

@@ -160,7 +160,7 @@ func (h *UserAPI) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	err = h.userStore.UpdateUser(currentUser)
 	if err != nil {
 		h.logger.Printf("ERROR: updating user: %v", err)
-		utils.WriteJSON(w, http.StatusInternalServerError, utils.Envelope{"error": "internal server error"})
+		utils.WriteJSON(w, http.StatusInternalServerError, utils.Envelope{"error": "username is taken"})
 		return
 	}
 

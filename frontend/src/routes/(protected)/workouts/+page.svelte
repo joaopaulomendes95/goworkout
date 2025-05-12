@@ -222,7 +222,7 @@
 		'rounded-md px-2.5 py-1.5 text-xs font-medium transition focus:outline-none focus:ring-2';
 </script>
 
-<!-- Toast Notification - Redesigned with better animation and dismissibility -->
+<!-- Toast Notification -->
 {#if actionFeedback}
 	<div
 		in:fly={{ y: 32, duration: 300, easing: backOut }}
@@ -250,7 +250,7 @@
 	</div>
 {/if}
 
-<!-- Creating a modal for delete confirmation -->
+<!-- Modal for delete confirmation -->
 {#if workoutToDelete}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
@@ -289,8 +289,8 @@
 	</div>
 {/if}
 
+<!-- Displaying a stats dashboard with toggle arrow at the bottom -->
 <div class="mx-auto max-w-4xl space-y-6 p-4 md:p-8">
-	<!-- Displaying a redesigned stats dashboard with toggle arrow at the bottom -->
 	<section
 		class="relative overflow-hidden rounded-xl border border-orange-900/30 bg-gradient-to-br from-gray-900 via-gray-900 to-gray-900/95 shadow-xl"
 	>
@@ -321,7 +321,7 @@
 			</div>
 		</div>
 
-		<!-- Adding the toggle button at the bottom of the stats panel -->
+		<!-- Toggle button at the bottom of the stats panel -->
 		<button
 			class="flex w-full items-center justify-center border-t border-orange-900/30 bg-black/30 py-1.5 text-sm text-orange-400 transition hover:bg-black/40"
 			on:click={() => (showStats = !showStats)}
@@ -458,7 +458,7 @@
 								</div>
 							</div>
 
-							<!-- Expandable details section -->
+							<!-- Details section -->
 							{#if isExpanded && workout.entries && workout.entries.length > 0}
 								<div
 									in:slide={{ duration: 200, easing: quintOut }}
@@ -470,7 +470,7 @@
 											<li
 												class="relative rounded-md border border-gray-700/50 bg-gray-700/40 p-3 pl-8 text-sm leading-relaxed text-gray-300"
 											>
-												<!-- Fixing the exercise number positioning -->
+												<!-- Exercise number -->
 												<div
 													class="absolute top-3 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-orange-600/80 text-xs font-bold text-white"
 												>
@@ -609,7 +609,7 @@
 					</div>
 				</div>
 
-				<!-- Exercises Section - Redesigned to be more visually appealing -->
+				<!-- Exercises Section -->
 				<div class="space-y-5">
 					<div class="flex items-center justify-between">
 						<h3 class="flex items-center text-lg font-semibold text-white">

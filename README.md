@@ -5,11 +5,12 @@ Its a study subject to get familiar with GO, and frontend in general.
 
 Special thanks to:
 
-- https://github.com/Melkeydev/go-blueprint
-- https://github.com/go-chi/chi
-- https://github.com/air-verse/air
-- https://github.com/tailwindlabs/tailwindcss
-- https://github.com/neovim/neovim
+- <https://github.com/Melkeydev/go-blueprint>
+- <https://github.com/go-chi/chi>
+- <https://github.com/air-verse/air>
+- <https://github.com/sveltejs/kit>
+- <https://github.com/tailwindlabs/tailwindcss>
+- <https://github.com/neovim/neovim>
 
 Some way or another, these projects were either used as a reference or inspiration
 
@@ -56,45 +57,55 @@ See deployment for notes on how to deploy the project on a live system.
 ## MakeFile
 
 Run build make command with tests
+
 ```bash
 make all
 ```
 
 Build the application
+
 ```bash
 make build
 ```
 
 Run the application
+
 ```bash
 make run
 ```
+
 Create DB container
+
 ```bash
 make docker-run
 ```
 
 Shutdown DB Container
+
 ```bash
 make docker-down
 ```
 
 DB Integrations Test:
+
 ```bash
 make itest
 ```
 
 Live reload the application:
+
 ```bash
 make watch
 ```
 
 Run the test suite:
+
 ```bash
 make test
 ```
 
 Clean up binary from the last build:
+
 ```bash
 make clean
 ```

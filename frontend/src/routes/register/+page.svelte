@@ -14,7 +14,7 @@
 </script>
 
 <div
-	class="mx-auto mt-10 w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-xl dark:bg-gray-900"
+	class="mx-auto mt-10 w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-xl dark:bg-gray-800"
 >
 	<div class="text-center">
 		<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Create Account</h1>
@@ -72,7 +72,7 @@
 					name="email"
 					type="email"
 					placeholder="you@example.com"
-					class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 transition-all duration-200 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600"
+					class={inputClasses}
 				/>
 			</div>
 		</div>

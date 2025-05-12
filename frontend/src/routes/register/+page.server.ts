@@ -58,6 +58,7 @@ export const actions: Actions = {
 					message: result.error || result.message || 'Registration failed. Please try again.'
 				});
 			}
+
 		// Handle unexpected errors
 		} catch (error: any) {
 			if (isRedirect(error)) {

@@ -53,7 +53,7 @@ services:
     ports:
       - "${GOWORKOUT_DB_PORT}:5432"
     volumes:
-      - psql_volume_goworkout:/var/lib/postgresql/data
+      - psql_volume_goworkout:/var/lib/postgresql
     healthcheck:
       test:
         [

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Workout from '$lib/components/Workout.svelte';
+
 	const { data } = $props();
 
 	console.log('page Data', data);
@@ -9,6 +11,7 @@
 
 <main class="flex min-h-[100vh] flex-col items-center justify-center">
 	<h1>Homepage</h1>
+	<Workout {data} />
 
 	<nav>
 		<a href="/login">Login</a>

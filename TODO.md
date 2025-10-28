@@ -1,5 +1,3 @@
-# Reusable API client for frontend?
+# Remove frontend API, it talks to the backend
 
-# se n tiver login ou token n deixar ir para o cenas autorizadas
-
-### hooks.server.ts
+# move backend into its own folder

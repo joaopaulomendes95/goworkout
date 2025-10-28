@@ -1,7 +1,6 @@
 # goworkout
 
-This project is a basic web application to track workouts.
-Its a study subject to get familiar with GO, and frontend in general.
+This is a fullstack application about tracking your workouts.
 
 Special thanks to:
 
@@ -88,11 +87,12 @@ Instructions for running GoWorkout in development and production.
 
    ```ts
    // Use for Docker development
-   const API = "http://app:8080";
+   const API = 'http://app:8080'
    // Not: const API = 'http://localhost:8080';
    ```
 
 4. **Start development:**
+
    - From root:
 
      ```bash
@@ -112,6 +112,7 @@ Instructions for running GoWorkout in development and production.
      ```
 
 5. **Access:**
+
    - Frontend: [http://localhost:5173](http://localhost:5173)
    - Backend: [http://localhost:8080](http://localhost:8080)
    - DB: PostgreSQL on port 5432
@@ -164,6 +165,7 @@ Instructions for running GoWorkout in development and production.
    ```
 
 3. **Start production:**
+
    - From root:
 
      ```bash
@@ -177,6 +179,7 @@ Instructions for running GoWorkout in development and production.
      ```
 
 4. **Access:**
+
    - Frontend: [http://localhost:5173](http://localhost:5173)
    - Backend: [http://localhost:8080](http://localhost:8080)
    - DB: PostgreSQL on port 5432

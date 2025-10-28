@@ -9,7 +9,7 @@
 	console.log('health', health);
 </script>
 
-<main class="flex min-h-[100vh] flex-col items-center justify-center">
+<main class="flex min-h-screen flex-col items-center justify-center">
 	<h1>Homepage</h1>
 	<Workout {data} />
 

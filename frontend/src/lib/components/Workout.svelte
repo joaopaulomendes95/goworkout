@@ -7,7 +7,7 @@
 	class="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-700 dark:bg-gray-800"
 >
 	<h5 class="mb-3 text-base font-semibold text-gray-900 md:text-xl dark:text-white">
-		{workout.data.}
+		{workout.data}
 	</h5>
 	<p class="text-sm font-normal text-gray-500 dark:text-gray-400">Information about the workout</p>
 	<ul class="my-4 space-y-3">

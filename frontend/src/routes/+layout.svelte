@@ -7,11 +7,11 @@
 </script>
 
 <div class="min-h-screen bg-gray-900 text-white">
-	<Navbar></Navbar>
+	<Navbar />
 
 	<main class="container mx-auto p-4">
 		{@render children()}
 	</main>
 
-	<Footer></Footer>
+	<Footer />
 </div>

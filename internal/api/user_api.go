@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/strangecousinwst/goworkout/internal/middleware"
 	"github.com/strangecousinwst/goworkout/internal/store"
 	"github.com/strangecousinwst/goworkout/internal/utils"
 )
@@ -100,4 +101,17 @@ func (h *UserAPI) HandleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"user": user})
+}
+
+// HandleGetCurrentUser retrieves and returns the details of the currently authenticated user.
+// The user is identified via the authentication token processed by middleware.
+func (h *UserAPI) HandleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	// Retrieve user from context (set by authentication middleware).
+	user := middleware.GetUser(r)
+	if user == nil || user.IsAnonymous() {
+		utils.WriteJSON(w, http.StatusUnauthorized, utils.Envelope{"error": "unauthorized"})
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"user": user})
 }

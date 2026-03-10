@@ -1,8 +1,8 @@
-import type { LayoutServerLoad } from './(protected)/$types';
+import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
-  return {
-    authenticated: locals.authenticated,
-    user: locals.user
-  };
+	return {
+		authenticated: locals.authenticated,
+		user: locals.user
+	};
 };

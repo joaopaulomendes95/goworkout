@@ -1,5 +1,6 @@
-# Reusable API client for frontend?
+# TODO
 
-# se n tiver login ou token n deixar ir para o cenas autorizadas
-
-### hooks.server.ts
+- Implement logout functionality (clear cookies)
+- Add workout editing UI
+- Add workout deletion UI
+- Add unit tests for Go backend

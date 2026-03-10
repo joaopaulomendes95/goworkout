@@ -4,19 +4,19 @@
 import type { BackendUser, BackendWorkout } from '$lib/types';
 
 declare global {
-    namespace App {
-        interface Locals {
-            authenticated: boolean;
-            token?: string;
-            user?: BackendUser; // Use imported type
-        }
-        interface PageData {
-            user?: BackendUser; // Use imported type
-            authenticated?: boolean;
-            workouts?: BackendWorkout[]; // Use imported type
-            error?: { message: string };
-        }
-        // interface Error {}
-        // interface Platform {}
-    }
+	namespace App {
+		interface Locals {
+			authenticated: boolean;
+			token?: string;
+			user?: BackendUser; // Use imported type
+		}
+		interface PageData {
+			user?: BackendUser; // Use imported type
+			authenticated?: boolean;
+			workouts?: BackendWorkout[]; // Use imported type
+			error?: { message: string };
+		}
+		// interface Error {}
+		// interface Platform {}
+	}
 }

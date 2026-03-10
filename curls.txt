@@ -19,10 +19,10 @@ curl -X POST "http://localhost:8080/tokens/authentication" \
           "password": "SecureP@ssword123"
         }'
 
-// Create workout
+// Create workout (replace YOUR_TOKEN with actual token from login response)
 
 curl -X POST "http://localhost:8080/workouts" \
-     -H "Authorization: Bearer DRGCJXMFVHMHCYH3WOFTCU6KICLLKCLCG5ZNWFRBIS7AXL3NRFCQ" \
+     -H "Authorization: Bearer YOUR_TOKEN" \
      -H "Content-Type: application/json" \
      -d '{
           "title": "Morning Cardio",
@@ -41,10 +41,10 @@ curl -X POST "http://localhost:8080/workouts" \
           ]
         }'
 
-// Edit workout
+// Edit workout (replace YOUR_TOKEN and {id})
 
 curl -X PUT "http://localhost:8080/workouts/{id}" \
-     -H "Authorization: Bearer M6BOKTWSQJL74GJJO5OIOMOG3V63MYRIKLUBZ6ILEUQUPCN7472Q" \
+     -H "Authorization: Bearer YOUR_TOKEN" \
      -H "Content-Type: application/json" \
      -d '{
           "title": "Updated Cardio",

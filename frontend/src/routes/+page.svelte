@@ -1,10 +1,5 @@
 <script lang="ts">
-	const { data } = $props();
-
-	console.log('page Data', data);
-
-	let health = data.health;
-	console.log('health', health);
+	// Home page - no data needed currently
 </script>
 
 <main class="flex min-h-[100vh] flex-col items-center justify-center">

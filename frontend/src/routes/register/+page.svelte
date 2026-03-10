@@ -1,11 +1,16 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	let { form } = $props();
 
-	let currentUsername = $state(form?.username || '');
-	let currentEmail = $state(form?.email || '');
+	let currentUsername = $state('');
+	let currentEmail = $state('');
 	let currentPassword = $state('');
-	let currentBio = $state(form?.bio || '');
+	let currentBio = $state('');
+
+	$effect(() => {
+		if (form?.username) currentUsername = form.username;
+		if (form?.email) currentEmail = form.email;
+		if (form?.bio) currentBio = form.bio;
+	});
 </script>
 
 <div

@@ -1,53 +1,63 @@
-import { fail } from '@sveltejs/kit'; 
-import type { Actions, PageServerLoad } from './$types';
-import type { BackendWorkout, BackendWorkoutEntry } from '$lib/types';
+import type { PageServerLoad } from './$types';
+import type { BackendWorkout } from '$lib/types';
 
 const GO_API_URL = 'http://app:8080';
 
+export const load: PageServerLoad = async ({ locals, parent }) => {
+	const parentData = await parent();
 
-export const load: PageServerLoad = async ({ locals }) => {
-    if (!locals.authenticated || !locals.token) {
-    return { workouts: [], error: 'Not authenticated' }; // Or throw redirect
-  }
+	if (!locals.authenticated || !locals.token) {
+		return { workouts: [], error: 'Not authenticated', user: null, authenticated: false };
+	}
 
-  try {
-    const response = await fetch(`${GO_API_URL}/workouts/`, { // Ensure trailing slash matches Go route
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${locals.token}`
-      }
-    });
+	try {
+		const response = await fetch(`${GO_API_URL}/workouts/`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${locals.token}`
+			}
+		});
 
-    if (!response.ok) {
-      const errorResult = await response.json().catch(() => ({ error: `API error (${response.status}) fetching workouts.` }));
-      console.error("[Workouts Load] API Error fetching workouts:", response.status, errorResult);
-      return {
-        workouts: [], // Return empty array on error
-        error: errorResult.error || errorResult.message || `Failed to load workouts (status: ${response.status}).`
-      };
-    }
+		if (!response.ok) {
+			const errorResult: { error?: string; message?: string } = await response
+				.json()
+				.catch(() => ({ error: `API error (${response.status}) fetching workouts.` }));
+			console.error('[Workouts Load] API Error fetching workouts:', response.status, errorResult);
+			return {
+				workouts: [],
+				user: parentData.user,
+				authenticated: parentData.authenticated,
+				error:
+					errorResult.error ||
+					errorResult.message ||
+					`Failed to load workouts (status: ${response.status}).`
+			};
+		}
 
-    // Go API returns { workouts: [...] }
-    const data = await response.json(); 
-    
-    // Ensure the data structure matches what you expect
-    if (data && Array.isArray(data.workouts)) {
-      return {
-        workouts: data.workouts as BackendWorkout[] // Pass the workouts array to the page
-      };
-    } else {
-      console.error("[Workouts Load] Unexpected data structure from API:", data);
-      return {
-        workouts: [],
-        error: "Unexpected data structure from API."
-      };
-    }
+		const data = await response.json();
 
-  } catch (e: any) {
-    console.error("[Workouts Load] Network or unexpected error:", e);
-    return {
-      workouts: [],
-      error: 'A network error occurred while fetching workouts. Please try again.'
-    };
-  }
+		if (data && Array.isArray(data.workouts)) {
+			return {
+				workouts: data.workouts as BackendWorkout[],
+				user: parentData.user,
+				authenticated: parentData.authenticated
+			};
+		} else {
+			console.error('[Workouts Load] Unexpected data structure from API:', data);
+			return {
+				workouts: [],
+				user: parentData.user,
+				authenticated: parentData.authenticated,
+				error: 'Unexpected data structure from API.'
+			};
+		}
+	} catch (e) {
+		console.error('[Workouts Load] Network or unexpected error:', e);
+		return {
+			workouts: [],
+			user: parentData.user,
+			authenticated: parentData.authenticated,
+			error: 'A network error occurred while fetching workouts. Please try again.'
+		};
+	}
 };

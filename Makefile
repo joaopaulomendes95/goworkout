@@ -3,45 +3,44 @@ all: build test
 
 build:
 	@echo "Building..."
-
-	@go build -o main cmd/app/main.go
+	@cd backend && go build -o main cmd/app/main.go
 
 # Run the application
 run:
-	@go run cmd/app/main.go
+	@cd backend && go run cmd/app/main.go &amp;
 	@npm install --prefer-offline --no-fund --prefix ./frontend
 	@npm run dev --prefix ./frontend
 # Create DB container
 docker-run:
-	@if docker compose up --build 2>/dev/null; then \
+	@if docker compose up --build -f docker-compose.dev.yml 2>/dev/null; then \
 		: ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
-		docker-compose up --build; \
+		docker-compose -f docker-compose.dev.yml up --build; \
 	fi
 
 # Shutdown DB container
 docker-down:
-	@if docker compose down 2>/dev/null; then \
+	@if docker compose down -f docker-compose.dev.yml 2>/dev/null; then \
 		: ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
-		docker-compose down; \
+		docker-compose -f docker-compose.dev.yml down; \
 	fi
 
 # Test the application
 test:
 	@echo "Testing..."
-	@go test ./... -v
+	@cd backend && go test ./... -v
 # Integrations Tests for the application
 itest:
 	@echo "Running integration tests..."
-	@go test ./internal/database -v
+	@cd backend && go test ./internal/database -v
 
 # Clean the binary
 clean:
 	@echo "Cleaning..."
-	@rm -f main
+	@rm -f backend/main
 
 # Live Reload
 watch:

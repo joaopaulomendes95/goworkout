@@ -67,12 +67,6 @@ npm run format
 # Linting (check only)
 npm run lint
 
-# Database (Drizzle)
-npm run db:push
-npm run db:migrate
-npm run db:studio
-```
-
 ---
 
 ## Code Style Guidelines

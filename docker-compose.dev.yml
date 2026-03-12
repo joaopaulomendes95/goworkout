@@ -1,12 +1,10 @@
-version: "3.8"
-
 services:
   app:
-    image: golang:1.24.2-alpine
+    image: golang:1.25-alpine
     working_dir: /app
     command: sh -c "go mod download && go run cmd/app/main.go"
     volumes:
-      - .:/app
+      - ./backend:/app
     ports:
       - "${PORT}:${PORT}"
     environment:
@@ -53,7 +51,7 @@ services:
     ports:
       - "${GOWORKOUT_DB_PORT}:5432"
     volumes:
-      - psql_volume_goworkout:/var/lib/postgresql/data
+      - psql_volume_goworkout:/var/lib/postgresql
     healthcheck:
       test:
         [

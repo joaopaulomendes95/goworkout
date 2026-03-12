@@ -16,8 +16,4 @@ export const load: PageServerLoad = async () => {
 	const health = await getHealth();
 
 	console.log('health', health);
-
-	return {
-		health
-	};
 };

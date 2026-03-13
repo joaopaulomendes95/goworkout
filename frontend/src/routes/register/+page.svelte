@@ -1,5 +1,14 @@
 <script lang="ts">
-	let { form } = $props();
+	import { enhance } from '$app/forms';
+
+	interface FormState {
+		username?: string;
+		email?: string;
+		bio?: string;
+		error?: string;
+	}
+
+	let { form }: { form: FormState | null } = $props();
 
 	let currentUsername = $state('');
 	let currentEmail = $state('');
@@ -18,33 +27,21 @@
 >
 	<div class="text-center">
 		<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Create Account</h1>
-		<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Join GoWorkout today!</p>
+		<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Join Go Svelte Fullstack today!</p>
 	</div>
 
-	{#if form && form.message}
+	{#if form?.error}
 		<div
 			class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 transition-all duration-300 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
 			role="alert"
 		>
 			<div class="flex items-center">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="mr-2 h-5 w-5"
-					viewBox="0 0 20 20"
-					fill="currentColor"
-				>
-					<path
-						fill-rule="evenodd"
-						d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-						clip-rule="evenodd"
-					/>
-				</svg>
-				<span><strong class="font-medium">Registration Failed:</strong> {form.message}</span>
+				<span><strong class="font-medium">Registration Failed:</strong> {form.error}</span>
 			</div>
 		</div>
 	{/if}
 
-	<form method="POST" action="?/user_register" class="space-y-6">
+	<form method="POST" use:enhance class="space-y-6">
 		<div class="space-y-2">
 			<label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
 				>Username</label

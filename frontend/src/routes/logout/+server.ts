@@ -1,12 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ cookies, locals }) => {
+export const GET: RequestHandler = async ({ cookies }) => {
 	cookies.delete('auth_token', { path: '/' });
-	locals.user = undefined;
-	locals.token = undefined;
-	locals.authenticated = false;
-
-	// Redirect to login page after logout
 	throw redirect(303, '/login');
 };

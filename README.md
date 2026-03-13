@@ -1,100 +1,34 @@
-# goworkout
+# Go Svelte Fullstack
 
-This project is a basic web application to track workouts.
-Its a study subject to get familiar with GO, and frontend in general.
+A minimal fullstack template with Go backend and SvelteKit frontend.
 
-Special thanks to:
+## Quick Start
 
-- https://github.com/Melkeydev/go-blueprint
-- https://github.com/go-chi/chi
-- https://github.com/air-verse/air
-- https://github.com/tailwindlabs/tailwindcss
-- https://github.com/neovim/neovim
+```bash
+# Start development
+docker compose --profile dev up --build
+```
 
-Some way or another, these projects were either used as a reference or inspiration
-
-## Technology Stack
-
-- **Backend**: Go with Chi router
-- **Frontend**: Svelte + Tailwind CSS
-- **Database**: PostgreSQL with Goose migrations
-- **Authentication**: Custom token-based auth
+This starts:
+- **PostgreSQL** on port 5432
+- **Go backend** on port 8080
+- **SvelteKit frontend** on port 5173
 
 ## Project Structure
 
-- `/cmd` - Application entry point
-  - `/app` - Application main package
-- `/frontend` - Web client code
-  - `/src` - Frontend source code
-  - `/static` - Static assets
-- `/internal` - Private application code
-  - `/api` - REST API handlers
-  - `/database` - Database connection management
-  - `/server` - HTTP server configuration
-  - `/store` - Data access layer
-  - `/utils` - Helper functions
-- `/migrations` - PostgreSQL schema migrations
-
-## Requirements
-
-- Go 1.24 or higher
-- PostgreSQL 14+
-- Docker (optional)
-
-## Features
-
-- User authentication and management
-- Create and track workouts
-- Log exercises with sets, reps and weights
-- Responsive web interface
-
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-See deployment for notes on how to deploy the project on a live system.
-
-## MakeFile
-
-Run build make command with tests
-```bash
-make all
+```
+/backend          # Go API
+/frontend         # SvelteKit app
+docker-compose.yml
+Makefile
 ```
 
-Build the application
-```bash
-make build
-```
+## API Endpoints
 
-Run the application
-```bash
-make run
-```
-Create DB container
-```bash
-make docker-run
-```
-
-Shutdown DB Container
-```bash
-make docker-down
-```
-
-DB Integrations Test:
-```bash
-make itest
-```
-
-Live reload the application:
-```bash
-make watch
-```
-
-Run the test suite:
-```bash
-make test
-```
-
-Clean up binary from the last build:
-```bash
-make clean
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/users` | Register |
+| POST | `/api/tokens/authentication` | Login |
+| GET | `/api/me` | Get current user |
+| GET | `/api/hello` | Protected example |
+| GET | `/health` | Health check |

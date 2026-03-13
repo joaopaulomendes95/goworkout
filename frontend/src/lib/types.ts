@@ -1,27 +1,36 @@
-export interface BackendUser {
+export interface User {
 	id: number;
 	username: string;
 	email: string;
 	bio?: string;
+	created_at: string;
+	updated_at: string;
 }
 
-export interface BackendWorkoutEntry {
-	id?: number;
-	exercise_name: string;
-	sets: number;
-	reps?: number | null;
-	duration_seconds?: number | null;
-	weight?: number | null;
-	notes: string;
-	order_index: number;
+export interface RegisterRequest {
+	username: string;
+	email: string;
+	password: string;
+	bio?: string;
 }
 
-export interface BackendWorkout {
-	id: number;
-	user_id: number;
-	title: string;
-	description: string;
-	duration_minutes: number;
-	calories_burned: number;
-	entries: BackendWorkoutEntry[];
+export interface LoginRequest {
+	username: string;
+	password: string;
+}
+
+export interface AuthResponse {
+	user: User;
+	token: string;
+}
+
+export interface ApiError {
+	error: string;
+}
+
+export interface FormFailure {
+	username?: string;
+	email?: string;
+	bio?: string;
+	error: string;
 }

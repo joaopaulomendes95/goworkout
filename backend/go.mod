@@ -7,8 +7,8 @@ require (
 	github.com/go-chi/cors v1.2.2
 	github.com/jackc/pgx/v5 v5.9.2
 	github.com/joho/godotenv v1.5.1
-	golang.org/x/crypto v0.48.0
-	golang.org/x/net v0.51.0
+	golang.org/x/crypto v0.51.0
+	golang.org/x/net v0.55.0
 )
 
 require (
@@ -23,5 +23,5 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/pressly/goose/v3 v3.27.0
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 )
